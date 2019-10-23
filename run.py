@@ -52,12 +52,28 @@ def createaccount():
             return render_template('createaccount.html', template_error = "Could not create account: password fields do not match")
     return render_template('createaccount.html', template_error = "")
 
-# Main page containing ai.ML functionality TODO
+# Main page containing ai.ML functionality
 @app.route('/main', methods=['GET', 'POST'])
 def main():
     if not 'id' in session:
         return redirect(url_for('start'))
     return render_template('main.html')
+
+@app.route('/exploredatasets', methods=['GET', 'POST'])
+def exploredatasets():
+    db = client['aiML']
+    data_description = "description_1"
+    if not 'id' in session:
+        return redirect(url_for('start'))
+    if request.method == "POST":
+        if request.form["Collection"] == "Dataset_1":
+            data_description = "description_1"
+        elif request.form["Collection"] == "Dataset_2":
+            data_description = "description_2"
+        elif request.form["Collection"] == "Dataset_3":
+            data_description = "description_3"
+        preexisting_collections = []
+    return render_template('exploredatasets.html', description = data_description)
 
 # User can logout from their account
 @app.route('/logout', methods=['GET', 'POST'])
@@ -68,6 +84,7 @@ def logout():
         if request.form["returnhome"] == "Yes":
             session.pop("username", None)
             session.pop("email", None)
+            session.pop("password", None)
             session.pop("id", None)
             return redirect(url_for('start'))
         if request.form["returnhome"] == "No":
@@ -90,7 +107,7 @@ def update_email():
         return redirect(url_for('start'))
     if request.method == "GET":
         user_info = collection.find_one({"email":f"{session['email']}"})
-       # email = user_info['email']
+        email = user_info['email']
     if request.method == "POST":
         new_email = request.form['new-email']
         if collection.count_documents({"email":f"{request.form['new-email']}"}) > 0:
@@ -152,6 +169,7 @@ def delete_account():
     if request.method == "POST":
         if "delete-btn" in request.form:
             collection.delete_one({"_id":ObjectId(f"{session['id']}")})
+            client.close()
             return redirect(url_for('start'))
         if "returnhome" in request.form:
             return redirect(url_for('main'))

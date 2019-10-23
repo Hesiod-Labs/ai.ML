@@ -54,15 +54,32 @@
                         </div>
                         <a style='font-size:24px' class='fab' href="https://github.com/Hesiod-Labs/ai.ML">&#xf09b;</a>
                 </nav>
-                <div class="font_control">
-                    <h5>
-                      <div class="control">Welcome!</div>
-                    </h5>
-                    <div class="btn-group" style="width:100%">
-                            <a class="btn btn-secondary" style="width:33.3%">Upload Dataset [DEMO 2]</a>
-                            <a class="btn btn-secondary" href="build" style="width:33.3%">Continue Last Session</a>
-                            <a class="btn btn-secondary" href="exploredatasets" style="width:33.3%">Explore Datasets</a>
+            <!-- Input text box for submitting questions, and a dropdown menu for -->
+            <!-- sorting questions                                                -->
+            <div class="container">
+
+              <br>
+              <h1 align="center">   </h1>
+              <hr/>
+
+              </form>
+              <form class="form" method="post">
+                  <fieldset>
+                      <div class="row">
+                          <div class="form-group column"style="width:100%">
+                              <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref" name="Collection">
+                                  <option value="Dataset_1"selected name=>Dataset_1</option>
+                                  <option value="Dataset_2">Dataset_2</option>
+                                  <option value="Dataset_3">Dataset_3</option>
+                              </select>
+                              <input name="submit" style="width:100%" type="submit" value = "Post" class="btn btn-secondary"/>
+                          </div>
+                  </fieldset>
+                  <div class="form-group"align="center">
+                        <label >Description: {{ description }}</label>
                     </div>
-                </div>
+              </form>
+          </div>
+          </div>
     </body>
 </html>
