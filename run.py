@@ -3,11 +3,14 @@ import os
 from bson.objectid import ObjectId
 from flask import (Flask, flash, redirect, render_template, request, session,
                    url_for)
+from pandas import DataFrame
+from pandas.io.json import json_normalize
 from pymongo import MongoClient
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 client = MongoClient("mongodb+srv://hlabs_1:thinkBox@aiml-thzu0.mongodb.net/test?retryWrites=true&w=majority")
+df = DataFrame()
 
 # User can login to their account
 @app.route('/', methods=['GET', 'POST'])
@@ -63,6 +66,7 @@ def main():
 def exploredatasets():
     db = client['aiML']
     data_description = "description_1"
+    global df
     if not 'id' in session:
         return redirect(url_for('start'))
     if request.method == "POST":
@@ -72,8 +76,21 @@ def exploredatasets():
             data_description = "description_2"
         elif request.form["Collection"] == "Dataset_3":
             data_description = "description_3"
-        preexisting_collections = []
-    return render_template('exploredatasets.html', description = data_description)
+        collection = db[f'{request.form["Collection"]}']
+        selected_data = json_normalize(collection.find({}))
+        df = selected_data[selected_data.columns[0:4]].head(5)
+        client.close()
+        if "use-dataset-btn" in request.form:
+            return redirect(url_for('build'))
+    return render_template('exploredatasets.html', description=data_description, tables=[df.to_html(classes='data', header="true", index="false")])
+
+# User can build their model from their chosen dataset
+@app.route('/build', methods=['GET', 'POST'])
+def build():
+    if not 'id' in session:
+        return redirect(url_for('start'))
+    global df
+    return render_template('build.html')
 
 # User can logout from their account
 @app.route('/logout', methods=['GET', 'POST'])

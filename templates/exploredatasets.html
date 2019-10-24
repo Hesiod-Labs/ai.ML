@@ -1,4 +1,4 @@
-<!-- Main page for submitting and viewing questions -->
+<!-- Page for exploring preexisting datasets -->
 
 <!DOCTYPE html>
 <html>
@@ -25,12 +25,34 @@
                     font-size: 100px;
 
                 }
-    
                 .control
                 {
                     color:#000;
                     margin:10px;
                     font-size: 50px;
+                }
+                table.dataframe, .dataframe th, .dataframe td {
+                border: none;
+                border-bottom: 1px solid #C8C8C8;
+                border-collapse: collapse;
+                text-align:left;
+                padding: 10px;
+                margin-bottom: 40px;
+                font-size: 0.9em;
+                align-self: center;
+                }
+                tr:nth-child(odd) 
+                { 
+                    background-color:#eee; 
+                }
+                tr:nth-child(even)	
+                { 
+                    background-color:#fff; 
+                }
+
+                tr:hover           
+                { 
+                    background-color: #ffff99;
                 }
             </style>
     </head>
@@ -54,12 +76,11 @@
                         </div>
                         <a style='font-size:24px' class='fab' href="https://github.com/Hesiod-Labs/ai.ML">&#xf09b;</a>
                 </nav>
-            <!-- Input text box for submitting questions, and a dropdown menu for -->
-            <!-- sorting questions                                                -->
+            <!-- Dropdown for selecting a dataset -->
             <div class="container">
 
               <br>
-              <h1 align="center">   </h1>
+              <h1 align="center"> Please Select a Dataset </h1>
               <hr/>
 
               </form>
@@ -72,14 +93,20 @@
                                   <option value="Dataset_2">Dataset_2</option>
                                   <option value="Dataset_3">Dataset_3</option>
                               </select>
-                              <input name="submit" style="width:100%" type="submit" value = "Post" class="btn btn-secondary"/>
+                              <button type="submit" style="width:100%" class="btn btn-secondary my-1">Preview</button>
                           </div>
                   </fieldset>
                   <div class="form-group"align="center">
                         <label >Description: {{ description }}</label>
+                <!-- Creates table that displays a preview of the selected dataset -->
+                <h5 align="center"> Dataset </h5>
+                {% for table in tables %}
+                    {{ table|safe }}
+                {% endfor %}
+                <input name="use-dataset-btn" href="build" type="submit" value="Use Dataset" class="btn btn-secondary"/><hr/>
                     </div>
               </form>
-          </div>
+          </div>        
           </div>
     </body>
 </html>
