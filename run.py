@@ -66,23 +66,44 @@ def main():
 def exploredatasets():
     db = client['aiML']
     data_description = "description_1"
+    selected_dataset = ""
     global df
     if not 'id' in session:
         return redirect(url_for('start'))
     if request.method == "POST":
-        if request.form["Collection"] == "Dataset_1":
-            data_description = "description_1"
-        elif request.form["Collection"] == "Dataset_2":
-            data_description = "description_2"
-        elif request.form["Collection"] == "Dataset_3":
-            data_description = "description_3"
-        collection = db[f'{request.form["Collection"]}']
+        if "preview-btn" in request.form:
+            if request.form.get('selected_dataset', '') == "border_crossing":
+                data_description = """The Bureau of Transportation Statistics (BTS) Border Crossing Data provide summary statistics 
+                                        for inbound crossings at the U.S.-Canada and the U.S.-Mexico border at the port level. 
+                                        Data are available for trucks, trains, containers, buses, personal vehicles, passengers, 
+                                        and pedestrians. Border crossing data are collected at ports of entry by U.S. Customs and 
+                                        Border Protection (CBP). The data reflect the number of vehicles, containers, passengers or 
+                                        pedestrians entering the United States. CBP does not collect comparable data on outbound crossings. 
+                                        Users seeking data on outbound counts may therefore want to review data from individual bridge operators, 
+                                        border state governments, or the Mexican and Canadian governments. (https://www.kaggle.com/akhilv11/border-crossing-entry-data)
+                                        Note: Only the first 10 rows and first 10 columns are previewed below
+                                    """
+            elif request.form.get('selected_dataset', '') == "crime_population":
+                data_description = """This data set was extracted from FBI-UCR website for the year 2012 on US cities with population less 
+                                        than 250,000 people. The following statistics are provided: Population, Violent Crime Total, Murder/Manslaughter, 
+                                        Forcible Rape, Robbery, Aggravated Assault, Property Crime Total, Burglary, Larceny Theft, Motor Vehicle Theft, 
+                                        latitude and longitude. (https://www.kaggle.com/mascotinme/population-against-crime)
+                                        Note: Only the first 10 rows and first 10 columns are previewed below
+                                    """
+            elif request.form.get('selected_dataset', '') == "movies":
+                data_description = """This data on nearly 7000 films from over the last three decades contains general information on each film (i.e.
+                                        director, production company, rating, etc) as well as financial figures for the budget and revenue. All of this data
+                                        was scraped from IMBb. (https://www.kaggle.com/danielgrijalvas/movies)
+                                        Note: Only the first 10 rows and first 10 columns are previewed below
+                                    """
+        selected_dataset = request.form.get('selected_dataset', '')
+        collection = db[f'{selected_dataset}']
         selected_data = json_normalize(collection.find({}))
-        df = selected_data[selected_data.columns[0:4]].head(5)
+        df = selected_data[selected_data.columns[0:9]].head(10)
         client.close()
         if "use-dataset-btn" in request.form:
             return redirect(url_for('build'))
-    return render_template('exploredatasets.html', description=data_description, tables=[df.to_html(classes='data', header="true", index="false")])
+    return render_template('exploredatasets.html', selected_dataset=selected_dataset, description=data_description, tables=[df.to_html(classes='data', header="true", index="false")])
 
 # User can build their model from their chosen dataset
 @app.route('/build', methods=['GET', 'POST'])

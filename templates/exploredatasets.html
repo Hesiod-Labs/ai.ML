@@ -88,12 +88,12 @@
                   <fieldset>
                       <div class="row">
                           <div class="form-group column"style="width:100%">
-                              <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref" name="Collection">
-                                  <option value="Dataset_1"selected name=>Dataset_1</option>
-                                  <option value="Dataset_2">Dataset_2</option>
-                                  <option value="Dataset_3">Dataset_3</option>
+                              <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref" name="selected_dataset">
+                                  <option value="border_crossing"name="border_crossing" id="border_crossing" {% if selected_dataset =="border_crossing" %} selected {% endif %}>Border Crossing</option>
+                                  <option value="crime_population"name="crime_population" id="crime_population" {% if selected_dataset =="crime_population" %} selected {% endif %}>Crime Statistics for Small US Cities</option>
+                                  <option value="movies"name="movies" id="movies" {% if selected_dataset =="movies" %} selected {% endif %}>Movies</option>
                               </select>
-                              <button type="submit" style="width:100%" class="btn btn-secondary my-1">Preview</button>
+                              <button name="preview-btn"type="submit" style="width:100%" class="btn btn-secondary my-1">Preview</button>
                           </div>
                   </fieldset>
                   <div class="form-group"align="center">
