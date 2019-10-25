@@ -70,8 +70,8 @@ def exploredatasets():
     if not 'id' in session:
         return redirect(url_for('start'))
     if request.method == "POST":
-        if request.form["Collection"] == "Dataset_1":
-            data_description = "description_1"
+        if request.form["Collection"] == "CO2 Emissions":
+            data_description = "Emission data of greenhouse gases for different countries from 1750 to the present"
         elif request.form["Collection"] == "Dataset_2":
             data_description = "description_2"
         elif request.form["Collection"] == "Dataset_3":
