@@ -2,20 +2,21 @@ import json
 from typing import List, Dict, Union
 
 
-def _create_dataset(data: json):
-
-    d = json.loads(data)
-
-    return {
-        l: Feature(l, [Element(o, False) for o in obs]) for l, obs in d.items()
-        }
-
-
 class Element():
 
-    def __init__(self, value: Union[str, int, float], deleted=False):
+    def __init__(self, value: Union[str, int, float] = None, deleted=False):
         self.value = value
         self.deleted = deleted
+
+    @property
+    def missing(self) -> bool:
+        return self.value in {None, ''}
+
+    def delete(self):
+        self.deleted = True
+
+    def restore(self):
+        self.deleted = False
 
     def is_numeric(self) -> bool:
         if isinstance(self.value, str):
@@ -27,7 +28,8 @@ class Element():
         name = self.__class__.__name__
         v = self.value
         d = self.deleted
-        return f'{name}(value={v}, deleted={d})'
+        m = self.missing
+        return f'{name}(value={v}, missing={m}, deleted={d})'
 
     def __eq__(self, e):
         if isinstance(e, self.__class__):
@@ -47,9 +49,21 @@ class Element():
 
 class Feature():
 
-    def __init__(self, label: str, elements: List[Element]):
+    def __init__(self, label: str, elements: List[Element] = None):
         self.label = label
+        if not elements:
+            elements = []
         self.elements = elements
+
+    @property
+    def values(self):
+        return [e.value for e in self.elements]
+
+    def n_elements(self) -> int:
+        return len(self.elements)
+
+    def is_numeric(self) -> bool:
+        return all([o.is_numeric() for o in self.elements])
 
     def __repr__(self):
         name = self.__class__.__name__
@@ -60,26 +74,28 @@ class Feature():
 
     def __eq__(self, f):
         if isinstance(f, self.__class__):
-            if self.n_elements == f.n_elements:
-                return all(
-                    [so == fo for so, fo in zip(self.elements, f.elements)]
-                    )
+            if self.n_elements() == f.n_elements():
+                return
+                all([so == fo for so, fo in zip(self.elements, f.elements)])
         else:
             return False
-
-    def n_elements(self) -> int:
-        return len(self.elements)
-
-    def is_numeric(self) -> bool:
-        return all([o.is_numeric() for o in self.elements])
 
 
 class Dataset():
 
-    def __init__(self, dataset_id: str, data: json, **metadata):
+    def __init__(self, dataset_id: str, data: List[Feature] = None, **metadata):
         self.dataset_id = dataset_id
+        if not data:
+            data = []
+        self.features = {f.label: f for f in data}
         self.metadata = metadata
-        self.features = _create_dataset(data)
+
+    @property
+    def values(self):
+        return {
+            f.label:
+            [o.value for o in f.elements] for f in self.features.values()
+            }
 
     def __repr__(self):
         name = self.__class__.__name__
