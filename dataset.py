@@ -1,8 +1,8 @@
 import json
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 
-class Element():
+class Element:
 
     def __init__(self, value: Union[str, int, float] = None, deleted=False):
         self.value = value
@@ -25,7 +25,7 @@ class Element():
     def is_numeric(self) -> bool:
         if isinstance(self.value, str):
             return str.isnumeric(self.value)
-        elif isinstance(self.value, int) or isinstance(self.value, float):
+        elif isinstance(self.value, (int, float)):
             return True
         else:
             return False
@@ -57,9 +57,12 @@ class Element():
         return self.value <= e.value
 
 
-class Feature():
+class Feature:
 
-    def __init__(self, elements: List[Element] = None, label: str = '', deleted=False):
+    def __init__(self,
+                 elements: List[Element] = None,
+                 label: str = '',
+                 deleted=False):
         if not elements:
             elements = []
         self.elements = elements
@@ -101,9 +104,9 @@ class Feature():
         except ValueError:
             print('Element not found in feature.')
 
-    def count(self, e: Element):
-        return self.elements.count(e)
-  
+    def count(self, e):
+        return self.elements.count(Element(e))
+
     def n_elements(self) -> int:
         return len(self.elements)
 
@@ -113,10 +116,11 @@ class Feature():
     def __repr__(self):
         name = self.__class__.__name__
         l = self.label
+        i = id(self)
         n = len(self.elements)
         t = 'numerical' if self.is_numeric() else 'categorical'
         d = self.deleted
-        return f'{name}(label="{l}", n_elements={n}, type={t}, deleted={d})'
+        return f'{name}(label="{l}", id={i}, n_elements={n}, type={t}, deleted={d})'
 
     def __eq__(self, f):
         if isinstance(f, self.__class__):
@@ -127,46 +131,58 @@ class Feature():
             return False
 
 
-class Dataset():
+class Dataset:
 
-    def __init__(self, data: List[Feature] = None, dataset_id: str = None, **metadata):
+    def __init__(self, features: List[Feature] = None,
+                 dataset_id: str = '',
+                 **metadata):
         self.dataset_id = dataset_id
-        if not data:
-            data = []
-        self.features = data
+        if not features:
+            features = []       
+        self.features = {id(f): f for f in features}
         self.metadata = metadata
 
     @property
     def values(self):
-        return {
-            f.label:
-            [o.value for o in f.elements] for f in self.features.values
-            }
+        return {k:
+                [e.value for e in f.elements] for k, f in self.features.items()
+                }
+
+    @property
+    def shape(self):
+        rows = max([f.n_elements() for f in self.features.values()])
+        cols = self.n_features()
+        return (rows, cols)
 
     def add(self, f: Feature):
-        self.features.append(f)
+        if f.values not in self.values.values():
+            self.features[id(f)] = f
+        else:
+            raise ValueError('Feature already exists in the dataset. Adding'
+                             ' it will overwrite any modifications made to'
+                             ' the feature elements.')
 
     def delete(self, f: Feature):
-        self.features[self.features.index(f)].delete()
+        self.features[id(f)].delete()
 
     def restore(self, f: Feature):
-        self.features[self.features.index(f)].restore()
+        self.features[id(f)].restore()
 
     def n_features(self) -> int:
-        n_deleted = len([f for f in self.features if f.deleted])
-        return len(self.features) - n_deleted
+        n_deleted = len([f for f in self.features.values() if f.deleted])
+        return len(self.features.keys()) - n_deleted
 
     def n_numerical(self):
-        return len([f.is_numeric() for f in self.features])
+        return len([f.is_numeric() for f in self.features.values()])
 
     def n_categorical(self):
         return self.n_features() - self.n_numerical()
 
     def n_elements(self, f: Feature) -> int:
-        return self.features[self.features.index(f)].n_elements()
+        return self.features[id(f)].n_elements()
 
     def is_numeric(self, f: Feature) -> bool:
-        return self.features[self.features.index(f)].is_numeric()
+        return self.features[id(f)].is_numeric()
 
     def __repr__(self):
         name = self.__class__.__name__
