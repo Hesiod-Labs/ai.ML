@@ -3,18 +3,17 @@ from typing import Dict, List, Union
 
 
 class Element:
-
     def __init__(self, value: Union[str, int, float] = None, deleted=False):
         self.value = value
         self.deleted = deleted
 
     @property
     def type(self) -> str:
-        return 'numerical' if self.is_numeric() else 'categorical'
+        return "numerical" if self.is_numeric() else "categorical"
 
     @property
     def missing(self) -> bool:
-        return self.value in {None, ''}
+        return self.value in {None, ""}
 
     def delete(self):
         self.deleted = True
@@ -36,7 +35,7 @@ class Element:
         t = self.type
         d = self.deleted
         m = self.missing
-        return f'{name}(value={v}, type={t}, missing={m}, deleted={d})'
+        return f"{name}(value={v}, type={t}, missing={m}, deleted={d})"
 
     def __eq__(self, e):
         if isinstance(e, self.__class__):
@@ -58,11 +57,7 @@ class Element:
 
 
 class Feature:
-
-    def __init__(self,
-                 elements: List[Element] = None,
-                 label: str = '',
-                 deleted=False):
+    def __init__(self, elements: List[Element] = None, label: str = "", deleted=False):
         if not elements:
             elements = []
         self.elements = elements
@@ -72,9 +67,9 @@ class Feature:
     @property
     def type(self) -> str:
         if all([e.is_numeric() for e in self.elements]):
-            return 'numerical'
+            return "numerical"
         else:
-            return 'categorical'
+            return "categorical"
 
     @property
     def values(self) -> List:
@@ -84,13 +79,13 @@ class Feature:
         if e.type == self.type:
             self.elements.append(e)
         else:
-            raise TypeError('Element must be the same type as the feature.')
+            raise TypeError("Element must be the same type as the feature.")
 
     def remove(self, e: Element):
         try:
             self.elements.remove(e)
         except ValueError:
-            print('Element not found in feature.')
+            print("Element not found in feature.")
 
     def delete(self):
         self.deleted = True
@@ -102,7 +97,7 @@ class Feature:
         try:
             self.elements[self.elements.index(e_old)] = e_new
         except ValueError:
-            print('Element not found in feature.')
+            print("Element not found in feature.")
 
     def count(self, e):
         return self.elements.count(Element(e))
@@ -118,7 +113,7 @@ class Feature:
         l = self.label
         i = id(self)
         n = len(self.elements)
-        t = 'numerical' if self.is_numeric() else 'categorical'
+        t = "numerical" if self.is_numeric() else "categorical"
         d = self.deleted
         return f'{name}(label="{l}", id={i}, n_elements={n}, type={t}, deleted={d})'
 
@@ -132,21 +127,18 @@ class Feature:
 
 
 class Dataset:
-
-    def __init__(self, features: List[Feature] = None,
-                 dataset_id: str = '',
-                 **metadata):
+    def __init__(
+        self, features: List[Feature] = None, dataset_id: str = "", **metadata
+    ):
         self.dataset_id = dataset_id
         if not features:
-            features = []       
+            features = []
         self.features = {id(f): f for f in features}
         self.metadata = metadata
 
     @property
     def values(self):
-        return {k:
-                [e.value for e in f.elements] for k, f in self.features.items()
-                }
+        return {k: [e.value for e in f.elements] for k, f in self.features.items()}
 
     @property
     def shape(self):
@@ -158,9 +150,11 @@ class Dataset:
         if f.values not in self.values.values():
             self.features[id(f)] = f
         else:
-            raise ValueError('Feature already exists in the dataset. Adding'
-                             ' it will overwrite any modifications made to'
-                             ' the feature elements.')
+            raise ValueError(
+                "Feature already exists in the dataset. Adding"
+                " it will overwrite any modifications made to"
+                " the feature elements."
+            )
 
     def delete(self, f: Feature):
         self.features[id(f)].delete()
@@ -188,4 +182,4 @@ class Dataset:
         name = self.__class__.__name__
         ds_id = self.dataset_id
         n = self.n_features()
-        return f'{name}(id={ds_id}, n_features={n})'
+        return f"{name}(id={ds_id}, n_features={n})"
