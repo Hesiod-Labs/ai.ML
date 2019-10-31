@@ -1,9 +1,12 @@
-import json
-from typing import Dict, List, Union
+from typing import List, Union
 
 
 class Element:
-    def __init__(self, value: Union[str, int, float] = None, deleted=False):
+    def __init__(
+            self,
+            value: Union[str, int, float] = None,
+            deleted=False
+    ):
         self.value = value
         self.deleted = deleted
 
@@ -57,7 +60,12 @@ class Element:
 
 
 class Feature:
-    def __init__(self, elements: List[Element] = None, label: str = "", deleted=False):
+    def __init__(
+            self,
+            elements: List[Element] = None,
+            label: str = "",
+            deleted=False
+    ):
         if not elements:
             elements = []
         self.elements = elements
@@ -108,6 +116,7 @@ class Feature:
     def is_numeric(self) -> bool:
         return all([o.is_numeric() for o in self.elements])
 
+    # TODO Possibly use UUIDs instead for Dataset identifier.
     def __repr__(self):
         name = self.__class__.__name__
         l = self.label
@@ -115,7 +124,8 @@ class Feature:
         n = len(self.elements)
         t = "numerical" if self.is_numeric() else "categorical"
         d = self.deleted
-        return f'{name}(label="{l}", id={i}, n_elements={n}, type={t}, deleted={d})'
+        return f'{name}(' \
+            f'label="{l}", id={i}, n_elements={n}, type={t}, deleted={d})'
 
     def __eq__(self, f):
         if isinstance(f, self.__class__):
@@ -128,7 +138,10 @@ class Feature:
 
 class Dataset:
     def __init__(
-        self, features: List[Feature] = None, dataset_id: str = "", **metadata
+            self,
+            features: List[Feature] = None,
+            dataset_id: str = "",
+            **metadata
     ):
         self.dataset_id = dataset_id
         if not features:
@@ -138,13 +151,15 @@ class Dataset:
 
     @property
     def values(self):
-        return {k: [e.value for e in f.elements] for k, f in self.features.items()}
+        return {
+            k: [e.value for e in f.elements] for k, f in self.features.items()
+        }
 
     @property
     def shape(self):
         rows = max([f.n_elements() for f in self.features.values()])
         cols = self.n_features()
-        return (rows, cols)
+        return rows, cols
 
     def add(self, f: Feature):
         if f.values not in self.values.values():
