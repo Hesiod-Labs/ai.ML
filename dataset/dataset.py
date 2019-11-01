@@ -4,7 +4,7 @@ from typing import List, Union
 class Element:
     def __init__(
             self,
-            value: Union[str, int, float] = None,
+            value: Union[str, int, float],
             deleted=False
     ):
         self.value = value
@@ -16,7 +16,7 @@ class Element:
 
     @property
     def missing(self) -> bool:
-        return self.value in {None, ""}
+        return self.value == ""
 
     def delete(self):
         self.deleted = True
@@ -41,10 +41,7 @@ class Element:
         return f"{name}(value={v}, type={t}, missing={m}, deleted={d})"
 
     def __eq__(self, e):
-        if isinstance(e, self.__class__):
-            return self.value == e.value
-        else:
-            return False
+        return self.value == e.value
 
     def __gt__(self, e):
         return self.value > e.value
@@ -59,6 +56,8 @@ class Element:
         return self.value <= e.value
 
 
+# TODO Add is_target attribute. Allows for both supervised and unsupervised
+#   learning since no target indicates unsupervised.
 class Feature:
     def __init__(
             self,
@@ -74,14 +73,14 @@ class Feature:
 
     @property
     def type(self) -> str:
-        if all([e.is_numeric() for e in self.elements]):
-            return "numerical"
-        else:
-            return "categorical"
+        return "numerical" if self.is_numeric() else "categorical"
 
     @property
     def values(self) -> List:
         return [e.value for e in self.elements]
+
+    def rename(self, new_name: str):
+        self.label = new_name
 
     def add(self, e: Element):
         if e.type == self.type:
@@ -107,7 +106,7 @@ class Feature:
         except ValueError:
             print("Element not found in feature.")
 
-    def count(self, e):
+    def count(self, e) -> int:
         return self.elements.count(Element(e))
 
     def n_elements(self) -> int:
@@ -128,7 +127,7 @@ class Feature:
             f'label="{l}", id={i}, n_elements={n}, type={t}, deleted={d})'
 
     def __eq__(self, f):
-        if isinstance(f, self.__class__):
+        if self.__class__ == f.__class__:
             if self.n_elements() == f.n_elements():
                 comps = [so == fo for so, fo in zip(self.elements, f.elements)]
                 return all(comps)
@@ -161,6 +160,15 @@ class Dataset:
         cols = self.n_features()
         return rows, cols
 
+    def rename_feature(self, f: Feature, new_name: str):
+        try:
+            self.features[id(f)].rename(new_name)
+        except KeyError:
+            print("Feature does not exist in the dataset.")
+
+    def rename_dataset(self, new_name: str):
+        self.dataset_id = new_name
+
     def add(self, f: Feature):
         if f.values not in self.values.values():
             self.features[id(f)] = f
@@ -176,6 +184,18 @@ class Dataset:
 
     def restore(self, f: Feature):
         self.features[id(f)].restore()
+
+    def get_feature(self, f: Union[Feature, str, int]):
+        try:
+            if isinstance(f, Feature):
+                return self.features[id(f)]
+            elif isinstance(f, str):
+                ff = filter(lambda x: x[1].label == f, self.features.items())
+                return list(ff)[0][1]
+            elif isinstance(f, int):
+                return self.features[f]
+        except ValueError:
+            print('Feature does not exist in the dataset.')
 
     def n_features(self) -> int:
         n_deleted = len([f for f in self.features.values() if f.deleted])
