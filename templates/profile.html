@@ -1,0 +1,91 @@
+<!-- Page for viewing your profile, and links to pages that change account information-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My Profile</title>
+        <meta charset="utf-8">
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" ></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+        <link href="https://bootswatch.com/4/journal/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css' integrity='sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ' crossorigin='anonymous'>
+
+        <!-- Style settings -->
+        <style>
+            .font_control
+            {
+                background-color:#FFF;
+                padding:20px;
+                text-align: center;
+                margin: auto;
+                font-size: 20px;
+            }
+
+            .control
+            {
+                color:#000;
+                margin:10px;
+                font-size: 50px;
+            }
+
+        </style>
+    </head>
+    <body>
+
+            <!-- Creates the navigation bar, and references to respective pages-->
+            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: rgb(36, 138, 104);">
+                <a class="navbar-brand" href="main">ai.ML</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarColor01">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="profile">My Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="logout">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+                <a style='font-size:24px' class='fab' href="https://github.com/Hesiod-Labs/ai.ML">&#xf09b;</a>
+            </nav>
+
+            <!-- Displays current account settings -->
+            <div class="w-25 font_control">
+                <h5>
+                    <div class="control">My Account Details</div>
+                </h5>
+                <div class="label">Email: </div>
+                <p>{{ profile.email }}</p>
+                <div class="label">Username: </div>
+                <p>{{ profile.username }}</p>
+            <div>
+                <!-- Links to pages that change the account settings -->
+                <h5>
+                    <div class="control">Settings</div>
+                </h5>
+
+                <div class="font_control">
+                    <a class="btn btn-secondary" href="updateemail" role="button">Change Email</a>
+                </div>
+
+                <div class="font_control">
+                    <a class="btn btn-secondary" href="updateusername" role="button">Change Username</a>
+                </div>
+
+                <div class="font_control">
+                    <a class="btn btn-secondary" href="updatepassword" role="button">Change Password</a>
+                </div>
+
+                <div class="font_control">
+                    <a class="btn btn-secondary" href="deleteaccount" role="button">Delete Account</a>
+                </div>
+            </div>
+            </div>
+    </body>
+</html>
