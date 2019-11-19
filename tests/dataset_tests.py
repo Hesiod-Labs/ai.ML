@@ -1,3 +1,5 @@
+import numpy as np
+
 from hypothesis import given, example
 import hypothesis.strategies as s
 
@@ -133,9 +135,27 @@ def test_class_feature_delete_restore_and_deleted_attribute(e_list, l, d):
 
 @given(*two_features)
 def test_class_feature_equality(e1, l1, d1, e2, l2, d2):
-    f1_gen = generate_test_feature(elements=e1, label=l1, deleted=d1)
-    f2_gen = generate_test_feature(elements=e2, label=l2, deleted=d2)
-    pass
+    f1 = generate_test_feature(elements=e1, label=l1, deleted=d1)
+    f2 = generate_test_feature(elements=e2, label=l2, deleted=d2)
+    f1_values = [e[0] for e in e1]
+    f2_values = [e[0] for e in e2]
+    if len(f1_values) == len(f2_values):
+        if all([v1 == v2 for v1, v2 in zip(f1_values, f2_values)]):
+            assert f1 == f2
+    else:
+        assert f1 != f2
+
+
+@given(*feature)
+def test_class_feature_remove(e_list, l, d):
+    f = Feature(elements=e_list, label=l, deleted=d)
+    if e_list:
+        i = np.random.randint(0, len(e_list))
+        e_in_f = Element(value=e_list[i][0], deleted=e_list[i][1])
+        if e_in_f in f.elements:
+            assert e_in_f not in f.remove(e_in_f)
+        else:
+            assert ValueError
 
 
 if __name__ == "__main__":
@@ -147,3 +167,5 @@ if __name__ == "__main__":
     test_class_feature_is_numeric_and_type_property()
     test_class_feature_deleted_attribute()
     test_class_feature_values_property()
+    test_class_feature_equality()
+    test_class_feature_remove()
