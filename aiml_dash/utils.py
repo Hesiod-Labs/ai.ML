@@ -10,7 +10,7 @@ import dash_daq as daq
 
 import pandas as pd
 
-from build_parameters import PARAMETERS
+from aiml_dash.build_parameters import PARAMETERS
 
 NOW = datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")
 
@@ -118,7 +118,6 @@ def generate_switch(sw_id: str, attrs: Dict):
 
 
 def generate_dropdown(dd_id: str, attrs: Union[List, Dict], multi=False):
-    print(dd_id, type(attrs))
     if isinstance(attrs, List):
         return dcc.Dropdown(
             id=dd_id,
