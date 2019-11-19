@@ -1,3 +1,4 @@
+import uuid
 from typing import List, Union
 
 
@@ -10,6 +11,7 @@ class Element:
         self.value = value
         self.deleted = deleted
 
+    # TODO Unclear if categories are represented with dummy variables
     @property
     def type(self) -> str:
         return "numerical" if self.is_numeric() else "categorical"
@@ -41,7 +43,10 @@ class Element:
         return f"{name}(value={v}, type={t}, missing={m}, deleted={d})"
 
     def __eq__(self, e):
-        return self.value == e.value
+        if self.__class__ == e.__class__:
+            return self.value == e.value
+        else:
+            return False
 
     def __gt__(self, e):
         return self.value > e.value
@@ -63,12 +68,14 @@ class Feature:
             self,
             elements: List[Element] = None,
             label: str = "",
-            deleted=False
+            feature_id: str = None,
+            deleted: bool = False
     ):
         if not elements:
             elements = []
         self.elements = elements
         self.label = label
+        self.feature_id = str(uuid.uuid4()) if not feature_id else feature_id
         self.deleted = deleted
 
     @property
@@ -119,7 +126,7 @@ class Feature:
     def __repr__(self):
         name = self.__class__.__name__
         l = self.label
-        i = id(self)
+        i = self.feature_id
         n = len(self.elements)
         t = "numerical" if self.is_numeric() else "categorical"
         d = self.deleted
@@ -145,7 +152,7 @@ class Dataset:
         self.dataset_id = dataset_id
         if not features:
             features = []
-        self.features = {id(f): f for f in features}
+        self.features = {f.feature_id: f for f in features}
         self.metadata = metadata
 
     @property
@@ -162,16 +169,17 @@ class Dataset:
 
     def rename_feature(self, f: Feature, new_name: str):
         try:
-            self.features[id(f)].rename(new_name)
+            self.features[f.feature_id].rename(new_name)
         except KeyError:
             print("Feature does not exist in the dataset.")
 
     def rename_dataset(self, new_name: str):
         self.dataset_id = new_name
 
+    # TODO Use Feature.add()
     def add(self, f: Feature):
         if f.values not in self.values.values():
-            self.features[id(f)] = f
+            self.features[f.feature_id] = f
         else:
             raise ValueError(
                 "Feature already exists in the dataset. Adding"
@@ -180,20 +188,14 @@ class Dataset:
             )
 
     def delete(self, f: Feature):
-        self.features[id(f)].delete()
+        self.features[f.feature_id].delete()
 
     def restore(self, f: Feature):
         self.features[id(f)].restore()
 
-    def get_feature(self, f: Union[Feature, str, int]):
+    def get_feature(self, f: Feature):
         try:
-            if isinstance(f, Feature):
-                return self.features[id(f)]
-            elif isinstance(f, str):
-                ff = filter(lambda x: x[1].label == f, self.features.items())
-                return list(ff)[0][1]
-            elif isinstance(f, int):
-                return self.features[f]
+            return self.features[f.feature_id]
         except ValueError:
             print('Feature does not exist in the dataset.')
 
@@ -218,3 +220,9 @@ class Dataset:
         ds_id = self.dataset_id
         n = self.n_features()
         return f"{name}(id={ds_id}, n_features={n})"
+
+
+if __name__ == '__main__':
+    f1 = Feature([Element(i) for i in range(5)])
+    f2 = Feature([Element(i) for i in range(5)])
+    print(f1 == f2)
