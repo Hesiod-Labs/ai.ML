@@ -86,6 +86,8 @@ class TestMongo:
             assert (email_count_1 > 0) is False
             assert (email_count_2 == 0) is False  
         collection.update_one({"_id":user_id}, {"$set":{"email":"test2@case.edu"}})
+        email_count_1 = collection.count_documents({"email":"test1@case.edu"})
+        email_count_2 = collection.count_documents({"email":"test2@case.edu"})
         if email_count_1 == 0 and email_count_2 > 0:
             assert (email_count_1 == 0) is True
             assert (email_count_2 > 0) is True
@@ -109,6 +111,8 @@ class TestMongo:
             assert (username_count_1 > 0) is False
             assert (username_count_2 == 0) is False 
         collection.update_one({"_id":user_id}, {"$set":{"username":"test2user"}})
+        username_count_1 = collection.count_documents({"username":"test1user"})
+        username_count_2 = collection.count_documents({"username":"test2user"})
         if username_count_1 == 0 and username_count_2 > 0:
             assert (username_count_1 == 0) is True
             assert (username_count_2 > 0) is True
@@ -132,6 +136,8 @@ class TestMongo:
             assert (password_count_1 > 0) is False
             assert (password_count_2 == 0) is False
         collection.update_one({"_id":user_id}, {"$set":{"password":"test2pass"}})
+        password_count_1 = collection.count_documents({"password":"test1pass"})
+        password_count_2 = collection.count_documents({"password":"test2pass"})
         if password_count_1 == 0 and password_count_2 > 0:
             assert (password_count_1 == 0) is True
             assert (password_count_2 > 0) is True
@@ -155,6 +161,8 @@ class TestMongo:
             assert (password_count_1 > 0) is False
             assert (password_count_2 == 0) is False
         collection.delete_one({"_id":user_id})
+        password_count_1 = collection.count_documents({"password":"test1pass"})
+        password_count_2 = collection.count_documents({"password":"test2pass"})
         if (password_count_1 and password_count_2) == 0:
             assert ((password_count_1 and password_count_2) == 0) is True
         else:
