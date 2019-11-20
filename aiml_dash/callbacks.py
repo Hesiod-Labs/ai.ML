@@ -1,16 +1,16 @@
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-from aiml_dash.app import app
-from aiml_dash.build_parameters import PARAMETERS
-import aiml_dash.utils
+from app import app
+from build_parameters import PARAMETERS
+import utils
 
 
 @app.callback(
     Output('logistic regression-penalty-dropdown', 'options'),
     [Input('logistic regression-solver-dropdown', 'value')]
 )
-def filter_available_logistic_regression_penality(value):
+def filter_available_logistic_regression_penalty(value):
     penalties = PARAMETERS['logistic regression']['penalty']['options']
     items = penalties.items()
     solvers = {
@@ -20,7 +20,7 @@ def filter_available_logistic_regression_penality(value):
         'lbfgs': {k: v for k, v in items if k == 'l2'},
         'liblinear': {k: v for k, v in items if k != 'none'}
     }
-    return aiml_dash.utils.generate_options(solvers[value])
+    return utils.generate_options(solvers[value])
 
 
 @app.callback(
@@ -31,9 +31,9 @@ def filter_available_logistic_regression_solver(value):
     solvers = PARAMETERS['logistic regression']['solver']['options']
     elastic_net = {k: v for k, v in solvers.items() if k == 'saga'}
     if value == 'elasticnet':
-        return aiml_dash.utils.generate_options(elastic_net)
+        return utils.generate_options(elastic_net)
     else:
-        return aiml_dash.utils.generate_options(solvers)
+        return utils.generate_options(solvers)
 
 
 @app.callback(
@@ -65,15 +65,87 @@ def allow_degree_specification(value):
     [Input('algorithm_selection', 'value')]
 )
 def update_hyperparameter_container(value):
-    return [html.H4('Hyperparameters', style={'fontWeight': 'bold'})] + \
-           aiml_dash.utils.generate_widget(value)
+    return utils.generate_widget(value)
 
 
 @app.callback(
-    Output('output-data-upload', 'children'),
-    [Input('upload-data', 'contents')],
-    [State('upload-data', 'filename')]
+    Output('data_output-upload', 'children'),
+    [Input('data-upload', 'contents')],
+    [State('data-upload', 'filename')]
 )
 def update_output(content, name):
     if content:
-        return [aiml_dash.utils.parse_contents(content, name)]
+        return [utils.parse_contents(content, name)]
+
+
+model_output = html.Div(id='model_output', hidden=True)
+
+# TODO If the dictionary approach works, delete this section
+'''
+algo_callback_inputs = {
+    algo: [Input(f'{algo}-{param}-{meta["widget"]}', 'value')
+           for param, meta in PARAMETERS[algo].items()]
+    for algo in PARAMETERS.keys()
+}
+
+
+@app.callback(
+    Output('model_output', 'children'),
+    algo_callback_inputs['logistic regression']
+
+)
+def train_logistic_regression(
+        solver, penalty, l1_ratio, dual, tol, C, fit_intercept,
+        intercept_scaling, max_iter
+):
+    pass
+
+
+@app.callback(
+    Output('model_output', 'children'),
+    algo_callback_inputs['support vector classification']
+)
+def train_support_vector_classification(
+        kernel, C, degree, gamma, coef0, shrinking, tol, max_iter
+):
+    pass
+
+
+@app.callback(
+    Output('model_output', 'children'),
+    algo_callback_inputs['k nearest neighbors']
+)
+def train_k_nearest_neighbors(
+        algorithm, weights, metric, p, n_neighbors, leaf_size
+):
+    pass
+
+
+@app.callback(
+    Output('model_output', 'children'),
+    algo_callback_inputs['decision tree classification']
+)
+def train_decision_tree_classification(
+        criterion, splitter, max_features, max_depth, min_samples_split,
+        min_samples_leaf, min_weight_fraction_leaf, min_leaf_nodes,
+        min_impurity_decrease
+):
+    pass
+
+
+@app.callback(
+    Output('model_output', 'children'),
+    algo_callback_inputs['linear discriminant analysis']
+)
+def train_linear_discriminant_analysis(solver, shrinkage, n_components, tol):
+    pass
+'''
+
+
+@app.callback(
+    Output('data_output-upload', 'data'),
+    [Input('data_output-upload', 'sort_by'),
+     Input('data_output-upload', 'filter_query')]
+)
+def update_sort_filter_table(sort_by, filter_query):
+    expressions = filter_query.split(' && ')

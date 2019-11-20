@@ -10,9 +10,18 @@ import dash_daq as daq
 
 import pandas as pd
 
-from aiml_dash.build_parameters import PARAMETERS
+from build_parameters import PARAMETERS
 
 NOW = datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")
+
+
+def format_dataset_name(filename: str):
+    name = str.split(filename, '.')[0]
+    specials = ['_', '-', '~']
+    for s in specials:
+        if s in name:
+            name = name.replace(s, ' ')
+    return name.title()
 
 
 def parse_contents(file, filename):
@@ -25,15 +34,17 @@ def parse_contents(file, filename):
         print(e)
         return html.Div(['There was an error processing this file.'])
     return html.Div([
-        html.H3(str.split(filename, '.')[0].capitalize()),
-        html.H6('Descriptive Statistics'),
-        html.Div([generate_dtable(
+        html.H3(format_dataset_name(filename), style={'fontWeight': 'bold'}),
+        html.H4('Descriptive Statistics'),
+        generate_dtable(
             df.describe(),
             'descriptive',
-            virtual=False)]),
+            virtual=False,
+            editable=False
+        ),
         html.Br(),
-        html.H6('Dataset'),
-        html.Div([generate_dtable(df, table_id='dataset')]),
+        html.H4('Dataset'),
+        generate_dtable(df, table_id='dataset'),
     ])
 
 
@@ -50,33 +61,91 @@ def generate_options(options: Union[List, Dict]):
         ]
 
 
-def generate_dtable(df, table_id: str, virtual=True):
+def split_filter_query(query):
+    operators = [
+        ['ge ', '>='],
+        ['le ', '<='],
+        ['lt ', '<'],
+        ['gt ', '>'],
+        ['ne ', '!='],
+        ['eq ', '='],
+        ['contains '],
+        ['datestartswith ']
+    ]
+    for op_type in operators:
+        for op in op_type:
+            if op in query:
+                name, value = query.split(op, 1)
+                name = name[name.find('{') + 1: name.rfind('}')]
+                value = value.strip()
+                v0 = value[0]
+                if v0 == value[-1] and v0 in {"'", '"', '`'}:
+                    value = value[1: -1].replace('\\' + v0, v0)
+                else:
+                    try:
+                        value = float(value)
+                    except ValueError as e:
+                        print(e)
+                return name, op_type[0].strip(), value
+    return [None] * 3
+
+
+def generate_dtable(
+        df,
+        table_id: str,
+        hide_cols=True,
+        rename_cols=True,
+        delete_cols=False,
+        virtual=True,
+        editable=True
+):
     df = pd.DataFrame(df)
     df[''] = df.index
+    df.columns = [c.replace('_', ' ').title() for c in df.columns]
     return dash_table.DataTable(
         id=table_id,
-        columns=[{'name': col,
-                  'id': col,
-                  'deletable': False}
-                 for col in sorted(df.columns)],
+        columns=[
+            {'name': col.title(),
+             'id': col,
+             'deletable': delete_cols,
+             'hideable': hide_cols,
+             'renamable': rename_cols} for col in sorted(df.columns)
+        ],
+        # row_selectable='multi',
         data=df.to_dict('records'),
         virtualization=virtual,
-
+        editable=editable,
         filter_action='custom',
         filter_query='',
-
         sort_action='custom',
         sort_mode='multi',
         sort_by=[],
-
-        fixed_rows={'headers': True, 'data': 0},
-
-        style_as_list_view=True,
-        style_cell={'padding': '5px', 'fontSize': '14pt'},
+        style_table={'overflowX': 'scroll'},
+        style_data_conditional=[
+            {
+                'if': {'row_index': 'odd'},
+                'backgroundColor': 'rgb(248, 248, 248)'
+            }
+        ],
+        style_data={
+            'whiteSpace': 'normal',
+            'height': 'auto'
+        },
         style_header={
-            'backgroundColor': 'white',
+            'textAlign': 'center',
+            'padding': '2px',
+            'backgroundColor': 'rgb(230, 230, 230)',
+            'height': 'auto',
+            'whiteSpace': 'normal',
             'fontWeight': 'bold',
-            'fontSize': '14pt',
+            'fontSize': '12pt',
+        },
+        style_cell={
+            'padding': '2px',
+            'height': 'auto',
+            'whiteSpace': 'normal',
+            'fontSize': '12pt',
+            'textAlign': 'center'
         },
     )
 
