@@ -1,9 +1,9 @@
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-from aiml_dash.app import app
-from aiml_dash.build_parameters import PARAMETERS
-import aiml_dash.utils
+from app import app
+from build_parameters import PARAMETERS
+import utils
 
 
 @app.callback(
@@ -20,7 +20,7 @@ def filter_available_logistic_regression_penality(value):
         'lbfgs': {k: v for k, v in items if k == 'l2'},
         'liblinear': {k: v for k, v in items if k != 'none'}
     }
-    return aiml_dash.utils.generate_options(solvers[value])
+    return utils.generate_options(solvers[value])
 
 
 @app.callback(
@@ -31,9 +31,9 @@ def filter_available_logistic_regression_solver(value):
     solvers = PARAMETERS['logistic regression']['solver']['options']
     elastic_net = {k: v for k, v in solvers.items() if k == 'saga'}
     if value == 'elasticnet':
-        return aiml_dash.utils.generate_options(elastic_net)
+        return utils.generate_options(elastic_net)
     else:
-        return aiml_dash.utils.generate_options(solvers)
+        return utils.generate_options(solvers)
 
 
 @app.callback(
@@ -66,7 +66,7 @@ def allow_degree_specification(value):
 )
 def update_hyperparameter_container(value):
     return [html.H4('Hyperparameters', style={'fontWeight': 'bold'})] + \
-           aiml_dash.utils.generate_widget(value)
+           utils.generate_widget(value)
 
 
 @app.callback(
@@ -76,4 +76,4 @@ def update_hyperparameter_container(value):
 )
 def update_output(content, name):
     if content:
-        return [aiml_dash.utils.parse_contents(content, name)]
+        return [utils.parse_contents(content, name)]

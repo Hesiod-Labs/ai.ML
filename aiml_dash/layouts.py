@@ -1,9 +1,9 @@
 import dash_core_components as dcc
 import dash_html_components as html
 
-from aiml_dash.build_parameters import PARAMETERS
-from aiml_dash.build_parameters import SCORING_METRICS
-import aiml_dash.utils
+from build_parameters import PARAMETERS
+from build_parameters import SCORING_METRICS
+import utils
 
 dataset_layout = html.Div([
     dcc.Upload(
@@ -32,7 +32,7 @@ algorithm_selection = html.Div([
         style={'float': 'left', 'width': '46%', 'padding': '2%'},
         children=[
             html.H4('Algorithm Selection', style={'fontWeight': 'bold'}),
-            aiml_dash.utils.generate_dropdown(
+            utils.generate_dropdown(
                 'algorithm_selection',
                 list(PARAMETERS.keys()),
             )
@@ -42,7 +42,7 @@ algorithm_selection = html.Div([
                  html.H4('Model Name', style={'fontWeight': 'bold'}),
                  dcc.Input(
                      id='model-name',
-                     value=f'Unnamed Model ({aiml_dash.utils.NOW})',
+                     value=f'Unnamed Model ({utils.NOW})',
                      maxLength=50,
                      style={'display': 'inline-block', 'width': '100%'}
                  ),
@@ -62,7 +62,7 @@ preproccesing = html.Div(
         html.H6('Center'),
         dcc.Dropdown(
             id='center-dropdown',
-            options=aiml_dash.utils.generate_options(
+            options=utils.generate_options(
                 ['A', 'B', 'C', 'All']
             ),
             multi=True
@@ -71,7 +71,7 @@ preproccesing = html.Div(
         html.H6('Scale'),
         dcc.Dropdown(
             id='scale-dropdown',
-            options=aiml_dash.utils.generate_options(
+            options=utils.generate_options(
                 ['A', 'B', 'C', 'All']
             ),
             multi=True
@@ -82,7 +82,7 @@ preproccesing = html.Div(
                  children=[
                      dcc.Dropdown(
                          id='map_to_distribution-dropdown',
-                         options=aiml_dash.utils.generate_options(
+                         options=utils.generate_options(
                              ['Gaussian', 'Poisson']
                          ),
                          multi=False
@@ -91,7 +91,7 @@ preproccesing = html.Div(
                  children=[
                      dcc.Dropdown(
                          id='map_to_distribution2-dropdown',
-                         options=aiml_dash.utils.generate_options(
+                         options=utils.generate_options(
                              ['a', 'b', 'c', 'all']
                          ),
                          multi=True
@@ -107,7 +107,7 @@ model_selection = html.Div(
     children=[
         html.H4('Model Selection', style={'fontWeight': 'bold'}),
         html.H6('Cross Validation'),
-        aiml_dash.utils.generate_dropdown(
+        utils.generate_dropdown(
             'cross_validation-dropdown',
             ['A', 'B', 'C', 'All'],
             multi=True
@@ -115,7 +115,7 @@ model_selection = html.Div(
         html.Br(),
         html.Div([
             html.H6('Scoring Metric'),
-            aiml_dash.utils.generate_dropdown(
+            utils.generate_dropdown(
                 'scoring_metrics-dropdown',
                 SCORING_METRICS['classification'],
                 multi=True
@@ -123,7 +123,7 @@ model_selection = html.Div(
         ]),
         html.Br(),
         html.H6('Hyperparameter Tuning Strategy'),
-        aiml_dash.utils.generate_dropdown(
+        utils.generate_dropdown(
             'hyperparameter_tuning_strategy-dropdown',
             ['none', 'grid search', 'random']
         )
