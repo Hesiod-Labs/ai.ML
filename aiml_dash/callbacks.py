@@ -1,5 +1,6 @@
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+from model import Model
 
 from app import app
 from build_parameters import PARAMETERS
@@ -46,7 +47,7 @@ def allow_l1_ratio_specification(value):
 
 @app.callback(
     Output('k nearest neighbors-p-input', 'disabled'),
-    [Input('k nearest neighbors-metric-dropdown', 'value')]
+    [Input('k nearest neighbors-n_neighbors-dropdown', 'value')]
 )
 def allow_minkowski_specification(value):
     return value.lower() != 'minkowski'
@@ -78,10 +79,6 @@ def update_output(content, name):
         return [utils.parse_contents(content, name)]
 
 
-model_output = html.Div(id='model_output', hidden=True)
-
-# TODO If the dictionary approach works, delete this section
-'''
 algo_callback_inputs = {
     algo: [Input(f'{algo}-{param}-{meta["widget"]}', 'value')
            for param, meta in PARAMETERS[algo].items()]
@@ -89,59 +86,104 @@ algo_callback_inputs = {
 }
 
 
+# TODO model_id, dataset_id, X, y parameters
+# dataset_id not needed if X can be train data and y can be labels
+# model id needed for database recording, if not stored then not needed
+
 @app.callback(
-    Output('model_output', 'children'),
-    algo_callback_inputs['logistic regression']
+    Output('logistic regression', 'children'),
+    algo_callback_inputs['logistic regression']+[Input('model_name-input', 'value')]
 
 )
 def train_logistic_regression(
         solver, penalty, l1_ratio, dual, tol, C, fit_intercept,
-        intercept_scaling, max_iter
+        intercept_scaling, max_iter, model_name
 ):
-    pass
+    params = {'solver': solver, 'penalty': penalty, 'l1_ratio': l1_ratio, 'dual': dual, 'tol': tol, 'C': C,
+              'fit_intercept': fit_intercept, 'intercept_scaling': intercept_scaling, 'max_iter': max_iter}
+    model_id = '1'
+    dataset_id = '1'
+    X = []
+    y = []
+    model = Model(model_name=model_name, model_type='LGR', params=params, model_id=model_id, dataset_id=dataset_id,
+                  X=X, y=y)
+    return model.picklize()
 
 
 @app.callback(
-    Output('model_output', 'children'),
-    algo_callback_inputs['support vector classification']
+    Output('support vector classification', 'children'),
+    algo_callback_inputs['support vector classification']+[Input('model_name-input', 'value')]
 )
 def train_support_vector_classification(
-        kernel, C, degree, gamma, coef0, shrinking, tol, max_iter
+        kernel, C, degree, gamma, coef0, shrinking, tol, max_iter, model_name
 ):
-    pass
+    params = {'kernel': kernel, 'C': C, 'degree': degree, 'gamma': gamma, 'coef0': coef0, 'shrinking': shrinking,
+              'tol': tol, 'max_iter': max_iter}
+    model_id = '1'
+    dataset_id = '1'
+    X = []
+    y = []
+    model = Model(model_name=model_name, model_type='SVC', params=params, model_id=model_id, dataset_id=dataset_id,
+                  X=X, y=y)
+    return model.picklize()
 
 
 @app.callback(
-    Output('model_output', 'children'),
-    algo_callback_inputs['k nearest neighbors']
+    Output('k nearest neighbors', 'children'),
+    algo_callback_inputs['k nearest neighbors']+[Input('model_name-input', 'value')]
 )
 def train_k_nearest_neighbors(
-        algorithm, weights, metric, p, n_neighbors, leaf_size
+        algorithm, weights, metric, p, n_neighbors, leaf_size, model_name
 ):
-    pass
+    params = {'algorithm': algorithm, 'weights': weights, 'metric': metric, 'p': p, 'n_neighbors': n_neighbors,
+              'leaf_size': leaf_size}
+    model_id = '1'
+    dataset_id = '1'
+    X = []
+    y = []
+    model = Model(model_name=model_name, model_type='KNN', params=params, model_id=model_id, dataset_id=dataset_id,
+                  X=X, y=y)
+    return model.picklize()
 
 
 @app.callback(
-    Output('model_output', 'children'),
-    algo_callback_inputs['decision tree classification']
+    Output('decision tree classification', 'children'),
+    algo_callback_inputs['decision tree classification']+[Input('model_name-input', 'value')]
 )
 def train_decision_tree_classification(
         criterion, splitter, max_features, max_depth, min_samples_split,
         min_samples_leaf, min_weight_fraction_leaf, min_leaf_nodes,
-        min_impurity_decrease
+        min_impurity_decrease, model_name
 ):
-    pass
+    params = {'criterion': criterion, 'splitter': splitter, 'max_features': max_features, 'max_depth': max_depth,
+              'min_samples_split': min_samples_split, 'min_samples_leaf': min_samples_leaf,
+              'min_weight_fraction_leaf': min_weight_fraction_leaf, 'min_leaf_nodes': min_leaf_nodes,
+              'min_impurity_decrease': min_impurity_decrease}
+    model_id = '1'
+    dataset_id = '1'
+    X = []
+    y = []
+    model = Model(model_name=model_name, model_type='DTC', params=params, model_id=model_id, dataset_id=dataset_id,
+                  X=X, y=y)
+    return model.picklize()
 
 
 @app.callback(
-    Output('model_output', 'children'),
-    algo_callback_inputs['linear discriminant analysis']
+    Output('linear discriminant analysis', 'children'),
+    algo_callback_inputs['linear discriminant analysis']+[Input('model_name-input', 'value')]
 )
-def train_linear_discriminant_analysis(solver, shrinkage, n_components, tol):
-    pass
+def train_linear_discriminant_analysis(solver, shrinkage, n_components, tol, model_name):
+    params = {'solver': solver, 'shrinkage': shrinkage, 'n_components': n_components, 'tol': tol}
+    model_id = '1'
+    dataset_id = '1'
+    X = []
+    y = []
+    model = Model(model_name=model_name, model_type='LDA', params=params, model_id=model_id, dataset_id=dataset_id,
+                  X=X, y=y)
+    return model.picklize()
+
+
 '''
-
-
 @app.callback(
     Output('data_output-upload', 'data'),
     [Input('data_output-upload', 'sort_by'),
@@ -149,3 +191,4 @@ def train_linear_discriminant_analysis(solver, shrinkage, n_components, tol):
 )
 def update_sort_filter_table(sort_by, filter_query):
     expressions = filter_query.split(' && ')
+'''
