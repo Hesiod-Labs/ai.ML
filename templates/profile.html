@@ -11,8 +11,7 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
         <link href="https://bootswatch.com/4/journal/bootstrap.min.css" rel="stylesheet" />
         <link rel="stylesheet" type="text/css" href="style.css">
-        <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css' integrity='sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ' crossorigin='anonymous'>
-
+        <link rel='stylesheet' href='https://codepen.io/chriddyp/pen/bWLwgP.css'>
         <!-- Style settings -->
         <style>
             .font_control
@@ -31,32 +30,27 @@
                 font-size: 50px;
             }
 
+            .button
+            {
+                width: 200px;
+            }
         </style>
     </head>
     <body>
 
             <!-- Creates the navigation bar, and references to respective pages-->
-            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: rgb(36, 138, 104);">
-                <a class="navbar-brand" href="main">ai.ML</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="navbarColor01">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="profile">My Profile</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="logout">Logout</a>
-                        </li>
-                    </ul>
-                </div>
-                <a style='font-size:24px' class='fab' href="https://github.com/Hesiod-Labs/ai.ML">&#xf09b;</a>
+            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #33C3F0;">
+                    <a class="navbar-brand" href="/main">ai.ML</a>
+                    <div class="collapse navbar-collapse" id="navbarColor01">
+                        <ul class="navbar-nav mr-auto">
+                                <a class="nav-link" href="profile">My Profile</a>
+                                <a class="nav-link" href="logout">Logout</a>
+                        </ul>
+                    </div>
             </nav>
 
             <!-- Displays current account settings -->
-            <div class="w-25 font_control">
+            <div class="w-50 font_control">
                 <h5>
                     <div class="control">My Account Details</div>
                 </h5>
@@ -71,19 +65,19 @@
                 </h5>
 
                 <div class="font_control">
-                    <a class="btn btn-secondary" href="updateemail" role="button">Change Email</a>
+                    <a class="button" href="updateemail" role="button">Change Email</a>
                 </div>
 
                 <div class="font_control">
-                    <a class="btn btn-secondary" href="updateusername" role="button">Change Username</a>
+                    <a class="button" href="updateusername" role="button">Change Username</a>
                 </div>
 
                 <div class="font_control">
-                    <a class="btn btn-secondary" href="updatepassword" role="button">Change Password</a>
+                    <a class="button" href="updatepassword" role="button">Change Password</a>
                 </div>
 
                 <div class="font_control">
-                    <a class="btn btn-secondary" href="deleteaccount" role="button">Delete Account</a>
+                    <a class="button" href="deleteaccount" role="button">Delete Account</a>
                 </div>
             </div>
             </div>
