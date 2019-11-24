@@ -1,19 +1,21 @@
 import base64
 import io
-from typing import Union, List, Dict
+import os
 from datetime import datetime
-
-import dash_core_components as dcc
-import dash_html_components as html
-import dash_table
-import dash_daq as daq
+from typing import Dict, List, Union
 
 import pandas as pd
+from pymongo import MongoClient
+
+import dash_core_components as dcc
+import dash_daq as daq
+import dash_html_components as html
+import dash_table
 
 from .build_parameters import PARAMETERS
 
 NOW = datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")
-
+client = MongoClient("mongodb+srv://hlabs_1:thinkBox@aiml-thzu0.mongodb.net/test?retryWrites=true&w=majority")
 
 def format_dataset_name(filename: str):
     name = str.split(filename, '.')[0]
@@ -23,13 +25,21 @@ def format_dataset_name(filename: str):
             name = name.replace(s, ' ')
     return name.title()
 
-
 def parse_contents(file, filename):
     content_type, content_string = file.split(',')
     decoded = base64.b64decode(content_string)
+    db = client['aiML']
     try:
         if 'csv' in filename:
             df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+            for key in df:
+                new_key = key.replace(".", "")
+                df[new_key] = df.pop(key)
+            stored_data = df.to_dict(orient='records')
+            collection_name = os.path.splitext(filename)[0]
+            collection = db[f'{collection_name}']
+            collection.insert_many(stored_data)
+            client.close()
     except Exception as e:
         print(e)
         return html.Div(['There was an error processing this file.'])

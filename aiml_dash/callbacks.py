@@ -3,7 +3,7 @@ from dash.dependencies import Input, Output, State
 
 import dash_core_components as dcc
 
-import run2
+import run
 from model import Model
 from .build_parameters import PARAMETERS
 from . import utils
@@ -13,7 +13,7 @@ MOCK_DS = Dataset(
     [Feature([Element(i * j) for i in range(10)]) for j in range(5)]
 )
 
-@run2.app.callback(
+@run.app.callback(
     Output('logistic regression-penalty-dropdown', 'options'),
     [Input('logistic regression-solver-dropdown', 'value')]
 )
@@ -30,7 +30,7 @@ def filter_available_logistic_regression_penalty(value):
     return utils.generate_options(solvers[value])
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('logistic regression-solver-dropdown', 'options'),
     [Input('logistic regression-penalty-dropdown', 'value')]
 )
@@ -43,7 +43,7 @@ def filter_available_logistic_regression_solver(value):
         return utils.generate_options(solvers)
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('logistic regression-l1_ratio-input', 'disabled'),
     [Input('logistic regression-penalty-dropdown', 'value')]
 )
@@ -51,7 +51,7 @@ def allow_l1_ratio_specification(value):
     return value.lower() != 'elasticnet'
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('k nearest neighbors-p-input', 'disabled'),
     [Input('k nearest neighbors-n_neighbors-dropdown', 'value')]
 )
@@ -59,7 +59,7 @@ def allow_minkowski_specification(value):
     return value.lower() != 'minkowski'
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('support vector classification-degree-input', 'disabled'),
     [Input('support vector classification-kernel-dropdown', 'value')]
 )
@@ -67,7 +67,7 @@ def allow_degree_specification(value):
     return value.lower() != 'poly'
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('hyperparameters-container', 'children'),
     [Input('algorithm_selection-dropdown', 'value')]
 )
@@ -76,7 +76,7 @@ def update_hyperparameters_container(value):
            utils.generate_widget(value)
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('data_output-upload', 'children'),
     [Input('data-upload', 'contents')],
     [State('data-upload', 'filename')]
@@ -86,7 +86,7 @@ def update_output(content, name):
         return [utils.parse_contents(content, name)]
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('cross_validation_repeats-input', 'disabled'),
     [Input('cross_validation_method-dropdown', 'value')]
 )
@@ -107,7 +107,7 @@ ALGO_CALLBACK_INPUTS = {
 # dataset_id not needed if X can be train data and y can be labels
 # model id needed for database recording, if not stored then not needed
 
-@run2.app.callback(
+@run.app.callback(
     Output('logistic regression', 'children'),
     ALGO_CALLBACK_INPUTS['logistic regression'] + [
         Input('model_name-input', 'value')]
@@ -131,7 +131,7 @@ def train_logistic_regression(
     return model.picklize()
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('support vector classification', 'children'),
     ALGO_CALLBACK_INPUTS['support vector classification'] + [
         Input('model_name-input', 'value')]
@@ -152,7 +152,7 @@ def train_support_vector_classification(
     return model.picklize()
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('k nearest neighbors', 'children'),
     ALGO_CALLBACK_INPUTS['k nearest neighbors'] + [
         Input('model_name-input', 'value')]
@@ -173,7 +173,7 @@ def train_k_nearest_neighbors(
     return model.picklize()
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('decision tree classification', 'children'),
     ALGO_CALLBACK_INPUTS['decision tree classification'] + [
         Input('model_name-input', 'value')]
@@ -200,7 +200,7 @@ def train_decision_tree_classification(
     return model.picklize()
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('linear discriminant analysis', 'children'),
     ALGO_CALLBACK_INPUTS['linear discriminant analysis'] + [
         Input('model_name-input', 'value')]
@@ -220,7 +220,7 @@ def train_linear_discriminant_analysis(solver, shrinkage, n_components, tol,
 
 
 '''
-@run2.app.callback(
+@run.app.callback(
     Output('scale-container', 'children'),
     [Input('add_scale-button', 'n_clicks')]
 )
@@ -234,13 +234,13 @@ def add_sliders(n_clicks):
 
 
 for i in range(MOCK_DS.n_features()):
-    @run2.app.callback(Output('slider-{}'.format(i), 'children'),
+    @run.app.callback(Output('slider-{}'.format(i), 'children'),
                   [Input('slider-{}'.format(i), 'value')])
     def update_additional_center(slider_i_value):
         return slider_i_value
 
 for i in range(10):
-    @run2.app.callback(Output(f'scale-{i}-container', 'children'),
+    @run.app.callback(Output(f'scale-{i}-container', 'children'),
                   [Input(f'scale_feature-dropdown-{i}', 'value'),
                    Input(f'scale_method-dropdown-{i}', 'value')]
                   )
@@ -248,7 +248,7 @@ for i in range(10):
         return scale_children
 
 
-@run2.app.callback(
+@run.app.callback(
     Output('data_output-upload', 'data'),
     [Input('data_output-upload', 'sort_by'),
      Input('data_output-upload', 'filter_query')]
@@ -264,7 +264,7 @@ from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 
 from model import Model
-from run2 import app
+from run import app
 from .build_parameters import PARAMETERS
 from . import utils
 from dataset.dataset import Element, Feature, Dataset
