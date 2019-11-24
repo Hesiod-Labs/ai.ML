@@ -1,7 +1,7 @@
-from app import app
-import dash_html_components as html
 import dash_core_components as dcc
+import dash_html_components as html
 
+from app import app
 from layouts import dataset_layout, build_layout
 import callbacks
 
@@ -13,13 +13,13 @@ were imported from aiml_index.py, the initial loading of aiml_index.py would
 ultimately require itself to be already imported, which cannot be satisfied. '''
 
 app.layout = html.Div([
-    dcc.Tabs(id='tabs', value='tab-1', children=[
+    dcc.Tabs(id='tabs', value='dataset', children=[
         dcc.Tab(label='Dataset', value='dataset', children=dataset_layout,
-                style={'fontSize': '14pt'}),
+                style={'fontSize': '14pt', 'fontWeight': 'bold'}),
         dcc.Tab(label='Build', value='build', children=build_layout,
-                style={'fontSize': '14pt'})]),
+                style={'fontSize': '14pt', 'fontWeight': 'bold'})]),
     html.Div(id='tabs-content')])
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, dev_tools_hot_reload_interval=0.1)

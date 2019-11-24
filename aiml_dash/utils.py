@@ -15,6 +15,15 @@ from build_parameters import PARAMETERS
 NOW = datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")
 
 
+def format_dataset_name(filename: str):
+    name = str.split(filename, '.')[0]
+    specials = ['_', '-', '~']
+    for s in specials:
+        if s in name:
+            name = name.replace(s, ' ')
+    return name.title()
+
+
 def parse_contents(file, filename):
     content_type, content_string = file.split(',')
     decoded = base64.b64decode(content_string)
@@ -25,15 +34,17 @@ def parse_contents(file, filename):
         print(e)
         return html.Div(['There was an error processing this file.'])
     return html.Div([
-        html.H3(str.split(filename, '.')[0].capitalize()),
-        html.H6('Descriptive Statistics'),
-        html.Div([generate_dtable(
+        html.H3(format_dataset_name(filename), style={'fontWeight': 'bold'}),
+        html.H4('Descriptive Statistics'),
+        generate_dtable(
             df.describe(),
             'descriptive',
-            virtual=False)]),
+            virtual=False,
+            editable=False
+        ),
         html.Br(),
-        html.H6('Dataset'),
-        html.Div([generate_dtable(df, table_id='dataset')]),
+        html.H4('Dataset'),
+        generate_dtable(df, table_id='dataset'),
     ])
 
 
@@ -50,33 +61,91 @@ def generate_options(options: Union[List, Dict]):
         ]
 
 
-def generate_dtable(df, table_id: str, virtual=True):
+def split_filter_query(query):
+    operators = [
+        ['ge ', '>='],
+        ['le ', '<='],
+        ['lt ', '<'],
+        ['gt ', '>'],
+        ['ne ', '!='],
+        ['eq ', '='],
+        ['contains '],
+        ['datestartswith ']
+    ]
+    for op_type in operators:
+        for op in op_type:
+            if op in query:
+                name, value = query.split(op, 1)
+                name = name[name.find('{') + 1: name.rfind('}')]
+                value = value.strip()
+                v0 = value[0]
+                if v0 == value[-1] and v0 in {"'", '"', '`'}:
+                    value = value[1: -1].replace('\\' + v0, v0)
+                else:
+                    try:
+                        value = float(value)
+                    except ValueError as e:
+                        print(e)
+                return name, op_type[0].strip(), value
+    return [None] * 3
+
+
+def generate_dtable(
+        df,
+        table_id: str,
+        hide_cols=True,
+        rename_cols=True,
+        delete_cols=False,
+        virtual=True,
+        editable=True
+):
     df = pd.DataFrame(df)
     df[''] = df.index
+    df.columns = [c.replace('_', ' ').title() for c in df.columns]
     return dash_table.DataTable(
         id=table_id,
-        columns=[{'name': col,
-                  'id': col,
-                  'deletable': False}
-                 for col in sorted(df.columns)],
+        columns=[
+            {'name': col.title(),
+             'id': col,
+             'deletable': delete_cols,
+             'hideable': hide_cols,
+             'renamable': rename_cols} for col in sorted(df.columns)
+        ],
+        # row_selectable='multi',
         data=df.to_dict('records'),
         virtualization=virtual,
-
+        editable=editable,
         filter_action='custom',
         filter_query='',
-
         sort_action='custom',
         sort_mode='multi',
         sort_by=[],
-
-        fixed_rows={'headers': True, 'data': 0},
-
-        style_as_list_view=True,
-        style_cell={'padding': '5px', 'fontSize': '14pt'},
+        style_table={'overflowX': 'scroll'},
+        style_data_conditional=[
+            {
+                'if': {'row_index': 'odd'},
+                'backgroundColor': 'rgb(248, 248, 248)'
+            }
+        ],
+        style_data={
+            'whiteSpace': 'normal',
+            'height': 'auto'
+        },
         style_header={
-            'backgroundColor': 'white',
+            'textAlign': 'center',
+            'padding': '2px',
+            'backgroundColor': 'rgb(230, 230, 230)',
+            'height': 'auto',
+            'whiteSpace': 'normal',
             'fontWeight': 'bold',
-            'fontSize': '14pt',
+            'fontSize': '12pt',
+        },
+        style_cell={
+            'padding': '2px',
+            'height': 'auto',
+            'whiteSpace': 'normal',
+            'fontSize': '12pt',
+            'textAlign': 'center'
         },
     )
 
@@ -108,7 +177,7 @@ def generate_input(
         maxLength=max_length if max_length else None,
         value=attrs['default'],
         step=attrs['options']['step'],
-        style={'textAlign': alignment},
+        style={'textAlign': alignment, 'width': '100%'},
         type=input_type
     )
 
@@ -117,20 +186,35 @@ def generate_switch(sw_id: str, attrs: Dict):
     return daq.BooleanSwitch(id=sw_id, on=attrs['default'])
 
 
-def generate_dropdown(dd_id: str, attrs: Union[List, Dict], multi=False):
+def convert_underscore_to_dash(kwargs: Dict):
+    formatted = kwargs.copy()
+    for k, v in kwargs.items():
+        if '_' in k:
+            formatted.pop(k)
+            formatted[k.replace('_', '-')] = v
+    return formatted
+
+
+def generate_dropdown(dd_id: str, attrs: Union[List, Dict], multi=False,
+                      **style):
+
+    formatted_style = convert_underscore_to_dash(style)
+
     if isinstance(attrs, List):
         return dcc.Dropdown(
             id=dd_id,
             options=generate_options(attrs),
             value=attrs[0],
-            multi=multi
+            multi=multi,
+            style=formatted_style
         )
     if isinstance(attrs, Dict):
         return dcc.Dropdown(
             id=dd_id,
             options=generate_options(attrs['options']),
             value=attrs['default'],
-            multi=multi
+            multi=multi,
+            style=formatted_style
         )
 
 
@@ -156,3 +240,19 @@ def generate_widget(algo_name):
 
         widgets.append(w)
     return widgets
+
+
+def generate_flex_style(direction='row', wrap=True, justify='left',
+                        alignment='stretch', grow='0', **kwargs):
+
+    formatted_style = convert_underscore_to_dash(kwargs)
+
+    params = {
+        'display': 'flex',
+        'flex-direction': direction,
+        'flex-wrap': 'wrap' if wrap else '',
+        'justify-content': justify,
+        'align-items': alignment,
+        'flex-grow': grow,
+    }
+    return {**params, **formatted_style}
