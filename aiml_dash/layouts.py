@@ -236,6 +236,7 @@ tuning_strategy = html.Div(
 
 train_model = html.Div(style={'textAlign': 'left'}, children=[
     dcc.ConfirmDialogProvider(
+        id='train_model-confirm',
         children=html.Button(id='train_model-button',
                              children='Train Model',
                              n_clicks=0,

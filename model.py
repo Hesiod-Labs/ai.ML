@@ -5,9 +5,9 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.svm import SVC
 import jsonpickle
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn import metrics
-
-
+from sklearn.datasets import load_iris
 # - Raise errors if there is bad data
 # - Return numpy array? Or just add it into it yourself
 # - Accuracy scores and metrics from confusion matrix etc, score and loss
@@ -29,8 +29,10 @@ class Model:
         self.params = params
         self.model_id = model_id
         self.dataset_id = dataset_id
+        self.X = X
+        self.y = y
         self.model = self.create_model()
-        self.results = self.train(self.model, X, y)
+        self.results = None
 
     def linear_discriminant_analysis(self):
         return LinearDiscriminantAnalysis(
@@ -128,17 +130,26 @@ class Model:
         return f'Name: {self.get_model_name()}, Type: {self.get_model_type()}, Dataset_ID:' \
             f' {self.get_dataset_id()}, Params: {self.list_params()}'
 
-    def train(self, model, X, y):
+    def train(self):
         # after the model is fit to some data
-        X_train, y_train, X_test, y_test = train_test_split(X, y, test_size=0.3)
+        X = load_iris().data
+        y = load_iris().target
+        #oh_enc = OneHotEncoder(categories='auto')
+        #label_enc = LabelEncoder().fit_transform(self.y)
+        #oh_enc.fit_transform(X, y)
+       # y = oh_enc.fit_transform(oh_enc).toarray()
+        X_train, y_train, X_test, y_test = train_test_split(
+            X, y, test_size=0.3)
         self.model.fit(X_train, y_train)
         predictions = self.model.predict(X_test)
         conf_matrix = metrics.confusion_matrix(y_test, predictions)
         acc_score = metrics.accuracy_score(y_test, predictions)
         class_report = metrics.classification_report(y_test, predictions)
-        return {'Confusion Matrix': conf_matrix,
-                'Accuracy Score': acc_score,
-                'Classification Report': class_report}
+        self.results = {
+            'Confusion Matrix': conf_matrix,
+            'Accuracy Score': acc_score,
+            'Classification Report': class_report
+        }
 
     def picklize(self):
         return jsonpickle.encode(self.model)
@@ -146,4 +157,3 @@ class Model:
     @staticmethod
     def depickleize(model_json):
         return jsonpickle.decode(model_json)
-

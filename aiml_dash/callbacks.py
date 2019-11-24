@@ -92,7 +92,6 @@ def jsonify_data(file, filename):
             decoded = base64.b64decode(content_string)
             if 'csv' in filename:
                 df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-                print(df)
                 return [df.to_json()]
     except Exception as e:
         print(e)
@@ -143,49 +142,59 @@ ALGO_CALLBACK_INPUTS = {
 
 
 @app.callback(
-    Output('logistic regression', 'children'),
+    Output('logistic regression-output', 'children'),
     ALGO_CALLBACK_INPUTS['logistic regression'] +
     [Input('model_name-input', 'value')] +
     [Input('stored_data-upload', 'children')] +
-    [Input('train_model-button', 'n_clicks')]
+    [Input('train_model-confirm', 'submit_n_clicks')] +
+    [Input('algorithm_selection-dropdown', 'value')]
 )
 def train_logistic_regression(
         solver, penalty, l1_ratio, dual, tol, C, fit_intercept,
-        intercept_scaling, max_iter, model_name, uploaded, button_click
+        intercept_scaling, max_iter, model_name, uploaded, button_click, algo
 ):
-    params = {'solver': solver, 'penalty': penalty, 'l1_ratio': l1_ratio,
-              'dual': dual, 'tol': tol, 'C': C,
-              'fit_intercept': fit_intercept,
-              'intercept_scaling': intercept_scaling, 'max_iter': max_iter}
-    model_id = '1'
-    dataset_id = '1'
-    data = pd.read_json(uploaded).to_numpy()
-    X = data[:, :-1]
-    y = data[::-1]
-    model = Model(model_name=model_name, model_type='LGR', params=params,
-                  model_id=model_id, dataset_id=dataset_id, X=X, y=y)
-    return [model.picklize()]
+    if button_click:
+        if l1_ratio == 0 and penalty != 'elasticnet':
+            l1_ratio = None
+        params = {'solver': solver, 'penalty': penalty, 'l1_ratio': l1_ratio,
+                  'dual': dual, 'tol': tol, 'C': C,
+                  'fit_intercept': fit_intercept,
+                  'intercept_scaling': intercept_scaling, 'max_iter': max_iter}
+        model_id = '1'
+        dataset_id = '1'
+        data = pd.read_json(uploaded[0]).to_numpy()
+        X = data[:, :-1]
+        y = data[::, -1]
+        model = Model(model_name=model_name, model_type='LGR', params=params,
+                      model_id=model_id, dataset_id=dataset_id, X=X, y=y)
+        model.train()
+        return [model.picklize()]
 
-
+'''
 @app.callback(
-    Output('support vector classification', 'children'),
+    Output('support vector classification-output', 'children'),
     ALGO_CALLBACK_INPUTS['support vector classification'] +
-    [Input('model_name-input', 'value')]
+    [Input('model_name-input', 'value')] +
+    [Input('stored_data-upload', 'children')] +
+    [Input('train_model-confirm', 'submit_n_clicks')]
 )
 def train_support_vector_classification(
-        kernel, C, degree, gamma, coef0, shrinking, tol, max_iter, model_name
+        kernel, C, degree, gamma, coef0, shrinking, tol, max_iter, model_name,
+        uploaded, button_click
 ):
     params = {'kernel': kernel, 'C': C, 'degree': degree, 'gamma': gamma,
               'coef0': coef0, 'shrinking': shrinking,
               'tol': tol, 'max_iter': max_iter}
     model_id = '1'
     dataset_id = '1'
-    X = []
-    y = []
+    data = pd.read_json(uploaded[0]).to_numpy()
+    X = data[:, :-1]
+    y = data[::, -1]
     model = Model(model_name=model_name, model_type='SVC', params=params,
                   model_id=model_id, dataset_id=dataset_id,
                   X=X, y=y)
     return [model.picklize()]
+
 
 
 @app.callback(
@@ -255,7 +264,6 @@ def train_linear_discriminant_analysis(solver, shrinkage, n_components, tol,
     return [model.picklize()]
 
 
-'''
 @app.callback(
     Output('scale-container', 'children'),
     [Input('add_scale-button', 'n_clicks')]
