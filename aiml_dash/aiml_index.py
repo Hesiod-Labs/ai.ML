@@ -1,9 +1,9 @@
 import dash_core_components as dcc
 import dash_html_components as html
 
-from app import app
-from layouts import dataset_layout, build_layout
-import callbacks
+from .app import app
+from .layouts import dataset_layout, build_layout
+from . import callbacks
 
 '''From Dash documentation: The Dash instance is defined in a separate
 app.py, while the entry point for running the app is aiml_index.py. This

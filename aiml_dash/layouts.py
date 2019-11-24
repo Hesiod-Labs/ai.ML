@@ -1,9 +1,8 @@
 import dash_core_components as dcc
 import dash_html_components as html
 
-from build_parameters import PARAMETERS
-from build_parameters import SCORING_METRICS
-import utils
+from .build_parameters import PARAMETERS, SCORING_METRICS
+from . import utils
 
 dataset_layout = html.Div(
     style={'margin': '2%'},

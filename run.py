@@ -671,9 +671,15 @@ def format_dataset_name(filename: str):
 def parse_contents(file, filename):
     content_type, content_string = file.split(',')
     decoded = base64.b64decode(content_string)
+    db = client['aiML']
     try:
         if 'csv' in filename:
             df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+            stored_data = df.to_dict(orient='records')
+            collection_name = os.path.splitext(filename)[0]
+            collection = db[f'{collection_name}']
+            collection.insert_many(stored_data)
+            client.close()
     except Exception as e:
         print(e)
         return html.Div(['There was an error processing this file.'])

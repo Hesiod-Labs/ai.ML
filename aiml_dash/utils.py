@@ -10,7 +10,7 @@ import dash_daq as daq
 
 import pandas as pd
 
-from build_parameters import PARAMETERS
+from .build_parameters import PARAMETERS
 
 NOW = datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")
 
