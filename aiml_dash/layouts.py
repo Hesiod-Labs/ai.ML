@@ -266,21 +266,12 @@ params_preprocess_selection = html.Div(
 )
 
 build_layout = html.Div([
-    html.Div(id='logistic regression-output',
-             style={'display': 'none'}
-             ),
-    html.Div(id='support vector classification-output',
-             style={'display': 'none'}
-             ),
-    html.Div(id='linear discriminant analysis-output',
-             style={'display': 'none'}
-             ),
-    html.Div(id='k nearest neighbors-output',
-             style={'display': 'none'}
-             ),
-    html.Div(id='decision tree classification-output',
-             style={'display': 'none'}
-             ),
+    html.Div(id='stored_data-upload', hidden=True),
+    html.Div(id='logistic regression-output', hidden=True),
+    html.Div(id='support vector classification-output', hidden=True),
+    html.Div(id='linear discriminant analysis-output', hidden=True),
+    html.Div(id='k nearest neighbors-output', hidden=True),
+    html.Div(id='decision tree classification-output', hidden=True),
     selection_and_name,
     params_preprocess_selection,
 

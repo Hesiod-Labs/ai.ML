@@ -24,30 +24,6 @@ def format_dataset_name(filename: str):
     return name.title()
 
 
-def parse_contents(file, filename):
-    content_type, content_string = file.split(',')
-    decoded = base64.b64decode(content_string)
-    try:
-        if 'csv' in filename:
-            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
-    except Exception as e:
-        print(e)
-        return html.Div(['There was an error processing this file.'])
-    return html.Div([
-        html.H3(format_dataset_name(filename), style={'fontWeight': 'bold'}),
-        html.H4('Descriptive Statistics'),
-        generate_dtable(
-            df.describe(),
-            'descriptive',
-            virtual=False,
-            editable=False
-        ),
-        html.Br(),
-        html.H4('Dataset'),
-        generate_dtable(df, table_id='dataset'),
-    ])
-
-
 def generate_options(options: Union[List, Dict]):
     if isinstance(options, List):
         return [
@@ -135,15 +111,11 @@ def generate_dtable(
             'textAlign': 'center',
             'padding': '2px',
             'backgroundColor': 'rgb(230, 230, 230)',
-            'height': 'auto',
-            'whiteSpace': 'normal',
             'fontWeight': 'bold',
             'fontSize': '12pt',
         },
         style_cell={
             'padding': '2px',
-            'height': 'auto',
-            'whiteSpace': 'normal',
             'fontSize': '12pt',
             'textAlign': 'center'
         },

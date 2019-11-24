@@ -1,7 +1,10 @@
+import base64
+import io
+
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-import dash_core_components as dcc
+import pandas as pd
 
 from model import Model
 from app import app
@@ -78,13 +81,43 @@ def update_hyperparameters_container(value):
 
 
 @app.callback(
-    Output('data_output-upload', 'children'),
+    Output('stored_data-upload', 'children'),
     [Input('data-upload', 'contents')],
     [State('data-upload', 'filename')]
 )
-def update_output(content, name):
-    if content:
-        return [utils.parse_contents(content, name)]
+def jsonify_data(file, filename):
+    try:
+        if file and filename:
+            content_type, content_string = file.split(',')
+            decoded = base64.b64decode(content_string)
+            if 'csv' in filename:
+                df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+                print(df)
+                return [df.to_json()]
+    except Exception as e:
+        print(e)
+        return html.Div(['There was an error processing this file.'])
+
+
+@app.callback(
+    Output('data_output-upload', 'children'),
+    [Input('stored_data-upload', 'children')]
+)
+def update_dataset_output(json_data):
+    if json_data:
+        data = pd.read_json(json_data[0])
+        return [html.Div([
+            html.H4('Descriptive Statistics'),
+            utils.generate_dtable(
+                data.describe(),
+                'descriptive',
+                virtual=False,
+                editable=False
+            ),
+            html.Br(),
+            html.H4('Dataset'),
+            utils.generate_dtable(data, table_id='dataset'),
+        ])]
 
 
 @app.callback(
@@ -108,15 +141,17 @@ ALGO_CALLBACK_INPUTS = {
 # dataset_id not needed if X can be train data and y can be labels
 # model id needed for database recording, if not stored then not needed
 
+
 @app.callback(
     Output('logistic regression', 'children'),
-    ALGO_CALLBACK_INPUTS['logistic regression'] + [
-        Input('model_name-input', 'value')]
-
+    ALGO_CALLBACK_INPUTS['logistic regression'] +
+    [Input('model_name-input', 'value')] +
+    [Input('stored_data-upload', 'children')] +
+    [Input('train_model-button', 'n_clicks')]
 )
 def train_logistic_regression(
         solver, penalty, l1_ratio, dual, tol, C, fit_intercept,
-        intercept_scaling, max_iter, model_name
+        intercept_scaling, max_iter, model_name, uploaded, button_click
 ):
     params = {'solver': solver, 'penalty': penalty, 'l1_ratio': l1_ratio,
               'dual': dual, 'tol': tol, 'C': C,
@@ -124,18 +159,18 @@ def train_logistic_regression(
               'intercept_scaling': intercept_scaling, 'max_iter': max_iter}
     model_id = '1'
     dataset_id = '1'
-    X = []
-    y = []
+    data = pd.read_json(uploaded).to_numpy()
+    X = data[:, :-1]
+    y = data[::-1]
     model = Model(model_name=model_name, model_type='LGR', params=params,
-                  model_id=model_id, dataset_id=dataset_id,
-                  X=X, y=y)
-    return model.picklize()
+                  model_id=model_id, dataset_id=dataset_id, X=X, y=y)
+    return [model.picklize()]
 
 
 @app.callback(
     Output('support vector classification', 'children'),
-    ALGO_CALLBACK_INPUTS['support vector classification'] + [
-        Input('model_name-input', 'value')]
+    ALGO_CALLBACK_INPUTS['support vector classification'] +
+    [Input('model_name-input', 'value')]
 )
 def train_support_vector_classification(
         kernel, C, degree, gamma, coef0, shrinking, tol, max_iter, model_name
@@ -150,13 +185,13 @@ def train_support_vector_classification(
     model = Model(model_name=model_name, model_type='SVC', params=params,
                   model_id=model_id, dataset_id=dataset_id,
                   X=X, y=y)
-    return model.picklize()
+    return [model.picklize()]
 
 
 @app.callback(
     Output('k nearest neighbors', 'children'),
-    ALGO_CALLBACK_INPUTS['k nearest neighbors'] + [
-        Input('model_name-input', 'value')]
+    ALGO_CALLBACK_INPUTS['k nearest neighbors'] +
+    [Input('model_name-input', 'value')]
 )
 def train_k_nearest_neighbors(
         algorithm, weights, metric, p, n_neighbors, leaf_size, model_name
@@ -171,13 +206,13 @@ def train_k_nearest_neighbors(
     model = Model(model_name=model_name, model_type='KNN', params=params,
                   model_id=model_id, dataset_id=dataset_id,
                   X=X, y=y)
-    return model.picklize()
+    return [model.picklize()]
 
 
 @app.callback(
     Output('decision tree classification', 'children'),
-    ALGO_CALLBACK_INPUTS['decision tree classification'] + [
-        Input('model_name-input', 'value')]
+    ALGO_CALLBACK_INPUTS['decision tree classification'] +
+    [Input('model_name-input', 'value')]
 )
 def train_decision_tree_classification(
         criterion, splitter, max_features, max_depth, min_samples_split,
@@ -198,13 +233,13 @@ def train_decision_tree_classification(
     model = Model(model_name=model_name, model_type='DTC', params=params,
                   model_id=model_id, dataset_id=dataset_id,
                   X=X, y=y)
-    return model.picklize()
+    return [model.picklize()]
 
 
 @app.callback(
     Output('linear discriminant analysis', 'children'),
-    ALGO_CALLBACK_INPUTS['linear discriminant analysis'] + [
-        Input('model_name-input', 'value')]
+    ALGO_CALLBACK_INPUTS['linear discriminant analysis'] +
+    [Input('model_name-input', 'value')]
 )
 def train_linear_discriminant_analysis(solver, shrinkage, n_components, tol,
                                        model_name):
@@ -217,7 +252,7 @@ def train_linear_discriminant_analysis(solver, shrinkage, n_components, tol,
     model = Model(model_name=model_name, model_type='LDA', params=params,
                   model_id=model_id, dataset_id=dataset_id,
                   X=X, y=y)
-    return model.picklize()
+    return [model.picklize()]
 
 
 '''
