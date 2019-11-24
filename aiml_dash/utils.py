@@ -177,7 +177,7 @@ def generate_input(
         maxLength=max_length if max_length else None,
         value=attrs['default'],
         step=attrs['options']['step'],
-        style={'textAlign': alignment},
+        style={'textAlign': alignment, 'width': '100%'},
         type=input_type
     )
 
@@ -186,20 +186,35 @@ def generate_switch(sw_id: str, attrs: Dict):
     return daq.BooleanSwitch(id=sw_id, on=attrs['default'])
 
 
-def generate_dropdown(dd_id: str, attrs: Union[List, Dict], multi=False):
+def convert_underscore_to_dash(kwargs: Dict):
+    formatted = kwargs.copy()
+    for k, v in kwargs.items():
+        if '_' in k:
+            formatted.pop(k)
+            formatted[k.replace('_', '-')] = v
+    return formatted
+
+
+def generate_dropdown(dd_id: str, attrs: Union[List, Dict], multi=False,
+                      **style):
+
+    formatted_style = convert_underscore_to_dash(style)
+
     if isinstance(attrs, List):
         return dcc.Dropdown(
             id=dd_id,
             options=generate_options(attrs),
             value=attrs[0],
-            multi=multi
+            multi=multi,
+            style=formatted_style
         )
     if isinstance(attrs, Dict):
         return dcc.Dropdown(
             id=dd_id,
             options=generate_options(attrs['options']),
             value=attrs['default'],
-            multi=multi
+            multi=multi,
+            style=formatted_style
         )
 
 
@@ -225,3 +240,19 @@ def generate_widget(algo_name):
 
         widgets.append(w)
     return widgets
+
+
+def generate_flex_style(direction='row', wrap=True, justify='left',
+                        alignment='stretch', grow='0', **kwargs):
+
+    formatted_style = convert_underscore_to_dash(kwargs)
+
+    params = {
+        'display': 'flex',
+        'flex-direction': direction,
+        'flex-wrap': 'wrap' if wrap else '',
+        'justify-content': justify,
+        'align-items': alignment,
+        'flex-grow': grow,
+    }
+    return {**params, **formatted_style}

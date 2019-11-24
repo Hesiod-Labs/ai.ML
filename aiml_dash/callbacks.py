@@ -1,9 +1,15 @@
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+import dash_core_components as dcc
 
 from app import app
 from build_parameters import PARAMETERS
 import utils
+from dataset.dataset import Element, Feature, Dataset
+
+MOCK_DS = Dataset(
+    [Feature([Element(i * j) for i in range(10)]) for j in range(5)]
+)
 
 
 @app.callback(
@@ -61,11 +67,12 @@ def allow_degree_specification(value):
 
 
 @app.callback(
-    Output('algorithm_parameters', 'children'),
-    [Input('algorithm_selection', 'value')]
+    Output('hyperparameters-container', 'children'),
+    [Input('algorithm_selection-dropdown', 'value')]
 )
-def update_hyperparameter_container(value):
-    return utils.generate_widget(value)
+def update_hyperparameters_container(value):
+    return [html.H4('Hyperparameters', style={'fontWeight': 'bold'})] + \
+           utils.generate_widget(value)
 
 
 @app.callback(
@@ -78,69 +85,43 @@ def update_output(content, name):
         return [utils.parse_contents(content, name)]
 
 
-model_output = html.Div(id='model_output', hidden=True)
+@app.callback(
+    Output('cross_validation_repeats-input', 'disabled'),
+    [Input('cross_validation_method-dropdown', 'value')]
+)
+def allow_repeats_specification(value):
+    if value.lower() in {'repeated k fold', 'repeated stratified k fold'}:
+        return False
+    return True
 
-# TODO If the dictionary approach works, delete this section
+
 '''
-algo_callback_inputs = {
-    algo: [Input(f'{algo}-{param}-{meta["widget"]}', 'value')
-           for param, meta in PARAMETERS[algo].items()]
-    for algo in PARAMETERS.keys()
-}
-
-
 @app.callback(
-    Output('model_output', 'children'),
-    algo_callback_inputs['logistic regression']
-
+    Output('scale-container', 'children'),
+    [Input('add_scale-button', 'n_clicks')]
 )
-def train_logistic_regression(
-        solver, penalty, l1_ratio, dual, tol, C, fit_intercept,
-        intercept_scaling, max_iter
-):
-    pass
+def add_sliders(n_clicks):
+    return html.Div(
+        [html.Div([
+            html.Div(dcc.Slider(id='slider-{}'.format(i))),
+            html.Div(id='output-{}'.format(i), style={'marginTop': 30})
+        ]) for i in range(n_clicks)]
+    )
 
 
-@app.callback(
-    Output('model_output', 'children'),
-    algo_callback_inputs['support vector classification']
-)
-def train_support_vector_classification(
-        kernel, C, degree, gamma, coef0, shrinking, tol, max_iter
-):
-    pass
+for i in range(MOCK_DS.n_features()):
+    @app.callback(Output('slider-{}'.format(i), 'children'),
+                  [Input('slider-{}'.format(i), 'value')])
+    def update_additional_center(slider_i_value):
+        return slider_i_value
 
-
-@app.callback(
-    Output('model_output', 'children'),
-    algo_callback_inputs['k nearest neighbors']
-)
-def train_k_nearest_neighbors(
-        algorithm, weights, metric, p, n_neighbors, leaf_size
-):
-    pass
-
-
-@app.callback(
-    Output('model_output', 'children'),
-    algo_callback_inputs['decision tree classification']
-)
-def train_decision_tree_classification(
-        criterion, splitter, max_features, max_depth, min_samples_split,
-        min_samples_leaf, min_weight_fraction_leaf, min_leaf_nodes,
-        min_impurity_decrease
-):
-    pass
-
-
-@app.callback(
-    Output('model_output', 'children'),
-    algo_callback_inputs['linear discriminant analysis']
-)
-def train_linear_discriminant_analysis(solver, shrinkage, n_components, tol):
-    pass
-'''
-
+for i in range(10):
+    @app.callback(Output(f'scale-{i}-container', 'children'),
+                  [Input(f'scale_feature-dropdown-{i}', 'value'),
+                   Input(f'scale_method-dropdown-{i}', 'value')]
+                  )
+    def update_output(feature_dropdown, method_dropdown):
+        return scale_children
 
 @app.callback(
     Output('data_output-upload', 'data'),
@@ -149,3 +130,4 @@ def train_linear_discriminant_analysis(solver, shrinkage, n_components, tol):
 )
 def update_sort_filter_table(sort_by, filter_query):
     expressions = filter_query.split(' && ')
+'''
