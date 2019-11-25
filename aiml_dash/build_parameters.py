@@ -113,10 +113,10 @@ PARAMETERS = {
                         'max': 1000000,
                         'step': 1,
                         },
-            'default': 0
+            'default': 1000000
         }
     },
-    'support vector classification': {
+    'support vector classification (coming soon)': {
         'kernel': {
             'label': 'kernel',
             'widget': 'dropdown',
@@ -192,10 +192,10 @@ PARAMETERS = {
                 'max': 1000000,
                 'step': 1,
             },
-            'default': 0,
+            'default': 1000000,
         }
     },
-    'k nearest neighbors': {
+    'k nearest neighbors (coming soon)': {
         'algorithm': {
             'label': 'algorithm',
             'widget': 'dropdown',
@@ -258,7 +258,7 @@ PARAMETERS = {
             'default': 30
         },
     },
-    'decision tree classification': {
+    'decision tree classification (coming soon)': {
         'criterion': {
             'label': 'split criterion',
             'widget': 'dropdown',
@@ -348,7 +348,7 @@ PARAMETERS = {
             'default': 0
         }
     },
-    'linear discriminant analysis': {
+    'linear discriminant analysis (coming soon)': {
         'solver': {
             'label': 'solver',
             'widget': 'dropdown',

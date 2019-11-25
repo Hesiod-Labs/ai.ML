@@ -8,7 +8,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 
-from typing import Dict
+from typing import Dict, List
 import numpy as np
 import jsonpickle
 
@@ -24,11 +24,13 @@ from aiml_dash import utils
 class Model:
 
     def __init__(self, model_id: str, model_type: str, dataset_id: str,
-                 estimator: BaseEstimator = None, scores: Dict = None):
+                 estimator: BaseEstimator = None, classes: List = None,
+                 scores: Dict = None):
         self.model_id = model_id
         self.model_type = model_type
         self.dataset_id = dataset_id
         self.estimator = estimator
+        self.classes = classes
         self.scores = dict() if not scores else scores
 
     @property
@@ -39,15 +41,20 @@ class Model:
         return f'Name: {self.model_id}, Type: {self.model_type}, ' \
             f'Dataset_ID:{self.dataset_id}, Params: {self.params}'
 
-    def score(self, true, predicted):
+    def score(self, true, predicted, feature_labels):
         self.scores.update({
             'confusion matrix': metrics.confusion_matrix(true, predicted),
-            'classification report': metrics.confusion_matrix(true, predicted),
+            'classification report': metrics.classification_report(
+                true,
+                predicted,
+                output_dict=True,
+                target_names=feature_labels),
             'accuracy': metrics.accuracy_score(true, predicted)
         })
 
     def train(self, features: np.ndarray, target: np.ndarray, **params):
         enc_target = LabelEncoder().fit(target)
+        self.classes = enc_target.classes_
         feat_tr, feat_te, tar_train, tar_test = train_test_split(
             features,
             enc_target.fit_transform(target),
@@ -64,7 +71,8 @@ class Model:
         if self.model_type == 'k nearest neighbors':
             self.estimator = KNN(**params).fit(feat_tr, tar_train)
 
-        self.score(tar_test, self.estimator.predict(feat_te))
+        self.score(tar_test, self.estimator.predict(feat_te),
+                   enc_target.classes_)
 
 
 def unpickle(model_json: str):

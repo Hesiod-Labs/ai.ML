@@ -150,7 +150,8 @@ preprocessing = html.Div(
         min_width='10%',
         max_width='30%'),
     children=[
-        html.H4('Preprocessing', style={'fontWeight': 'bold'}),
+        html.H4('Preprocessing (coming soon!)',
+                style={'fontWeight': 'bold', 'color': 'gray'}),
         #center,
         scale,
         add_scale,
@@ -253,7 +254,8 @@ model_selection = html.Div(
         min_width='10%',
         max_width='45%'),
     children=[
-        html.H4('Model Selection', style={'fontWeight': 'bold'}),
+        html.H4('Model Selection (coming soon!)',
+                style={'fontWeight': 'bold', 'color': 'gray'}),
         cross_validation,
         scoring_metric,
         tuning_strategy,
@@ -274,26 +276,4 @@ build_layout = html.Div([
 
 ])
 
-results_layout = html.Div(
-    id='results-container',
-    style={
-        'display': 'grid',
-        'grid-gap': '2%',  # 50px
-        'padding': '2%',
-        'grid-template-columns': 'auto auto auto'
-    },
-    children=[
-        html.Div(
-            id='model_details-container',
-            style={
-                'grid-row-start': '1',
-                'grid-row-end': '3',
-                'align-items': 'stretch'
-            },
-            children=[
-                html.H4('Model Results', style={'fontWeight': 'bold'}),
-                html.H5('Metrics', style={'fontWeight': 'bold'}),
-                html.Div(id='metrics-container')
-                ]),
-            ]
-        )
+results_layout = html.Div(id='results-container', style={'padding': '2%'})

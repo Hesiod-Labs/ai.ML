@@ -93,7 +93,7 @@ def generate_dtable(
              'id': col,
              'deletable': delete_cols,
              'hideable': hide_cols,
-             'renamable': rename_cols} for col in sorted(df.columns)
+             'renamable': rename_cols} for col in df.columns
         ],
         # row_selectable='multi',
         data=df.to_dict('records'),
@@ -104,17 +104,17 @@ def generate_dtable(
         sort_action='custom',
         sort_mode='multi',
         sort_by=[],
-        style_table={'overflowX': 'scroll'},
+        #style_table={'overflowX': 'scroll'},
         style_data_conditional=[
             {
                 'if': {'row_index': 'odd'},
                 'backgroundColor': 'rgb(248, 248, 248)'
             }
         ],
-        style_data={
-            'whiteSpace': 'normal',
-            'height': 'auto'
-        },
+        #style_data={
+        #    'whiteSpace': 'normal',
+        #    'height': 'auto'
+        #},
         style_header={
             'textAlign': 'center',
             'padding': '2px',

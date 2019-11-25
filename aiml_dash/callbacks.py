@@ -3,6 +3,9 @@ import io
 
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+import dash_core_components as dcc
+import plotly.graph_objs as go
+import plotly.express as px
 
 import pandas as pd
 
@@ -57,6 +60,17 @@ def update_dataset_output(jsoned_data):
             html.H4('Dataset'),
             utils.generate_dtable(data, table_id='dataset'),
         ])]
+
+
+'''
+@app.callback(
+    Output('data_output-upload', 'data'),
+    [Input('data_output-upload', 'sort_by'),
+     Input('data_output-upload', 'filter_query')]
+)
+def update_sort_filter_table(sort_by, filter_query):
+    expressions = filter_query.split(' && ')
+'''
 
 
 # Build page callbacks
@@ -157,7 +171,6 @@ def train_model(*args):
         model_name = args[-3]
         sk_params = {sk_param[0].split('-')[1]: value for sk_param, value in
                      zip(ALGO_CALLBACK_INPUTS, args[:-4])}
-        print(sk_params)
         m = model.Model(model_name, selected_algo, name)
         np_data = data.to_numpy()
         features = np_data[:, :-1]
@@ -188,7 +201,7 @@ def add_sliders(n_clicks, data):
                                  list(df.columns.values),
                                  multi=True,
                                  max_width='100%') for i in range(n_clicks)
-                              ]),
+                             ]),
                 html.Div(
                     style=utils.generate_flex_style(direction='column',
                                                     min_width='50%'),
@@ -198,7 +211,7 @@ def add_sliders(n_clicks, data):
                                  ['normalize', 'min-max', 'max-abs', 'standard',
                                   'robust'], max_width='100%')
                                  for i in range(n_clicks)
-                              ])
+                             ])
             ])
 
 
@@ -211,12 +224,62 @@ for i in range(10):
     def update_output(feature_dropdown, method_dropdown):
         return feature_dropdown, method_dropdown
 
-'''
-@app.callback(
-    Output('data_output-upload', 'data'),
-    [Input('data_output-upload', 'sort_by'),
-     Input('data_output-upload', 'filter_query')]
-)
-def update_sort_filter_table(sort_by, filter_query):
-    expressions = filter_query.split(' && ')
-'''
+
+# Results page callbacks
+@app.callback(Output('results-container', 'children'),
+              [Input('train_model-output', 'children'),
+               Input('train_model-confirm', 'submit_n_clicks')]
+              )
+def print_model_results(json_model, button_click):
+    if button_click:
+        trained_model = model.unpickle(json_model[0])
+        class_report = trained_model.scores['classification report']
+        accuracy = trained_model.scores['accuracy']
+        confusion_matrix = trained_model.scores['confusion matrix']
+        return [html.Div([
+            html.H2(trained_model.model_id, style={'fontWeight': 'bold'}),
+            html.H4('Classification Report'),
+            utils.generate_dtable(
+                class_report,
+                'classification_report-table',
+                virtual=False,
+                editable=False,
+            ),
+            html.Br(),
+            html.Div(
+                style=utils.generate_flex_style(), children=[
+                    html.Div(
+                        style=utils.generate_flex_style(grow='1'),
+                        children=[
+                            html.H4('Confusion Matrix'),
+                            dcc.Graph(
+                                id='confusion_matrix',
+                                style={'width': '100%'},
+                                figure=go.Figure(
+                                    data=go.Heatmap(
+                                        x=trained_model.classes,
+                                        y=trained_model.classes,
+                                        z=confusion_matrix,
+                                        colorscale='Blues'
+                                    )
+                                )
+                            ),
+                            html.H4('Scatter Plot'),
+                            dcc.Graph(
+                                id='scatter_plot',
+                                style={'width': '100%'},
+                                figure=go.Figure(
+                                    data=px.scatter(
+                                        px.data.iris(),
+                                        x='sepal_width',
+                                        y='sepal_length',
+                                        color='species',
+                                        hover_data=['petal_width']
+                                    )
+                                )
+                            )
+                        ]
+                    )
+                ])
+        ])
+        ]
