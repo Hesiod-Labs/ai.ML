@@ -161,7 +161,7 @@ def test_class_feature_remove(e_list, l, d):
 if __name__ == "__main__":
     test_class_element_equality()
     test_class_element_missing_attribute()
-    test_class_element_delete_restore_and_deleted_attribute()
+    test_class_feature_delete_restore_and_deleted_attribute()
     test_class_element_is_numeric_and_type_property()
     test_class_element_instance_comparison()
     test_class_feature_is_numeric_and_type_property()

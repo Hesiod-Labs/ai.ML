@@ -1,5 +1,4 @@
-import base64
-import io
+import json
 from typing import Union, List, Dict
 from datetime import datetime
 
@@ -13,6 +12,15 @@ import pandas as pd
 from build_parameters import PARAMETERS
 
 NOW = datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")
+
+
+def json_df(name: str, dataframe: pd.DataFrame):
+    return json.dumps({'name': name, 'data': dataframe.to_json()})
+
+
+def unjson_df(df_json: str):
+    df_dict = json.loads(df_json)
+    return df_dict['name'], pd.read_json(df_dict['data'])
 
 
 def format_dataset_name(filename: str):
@@ -169,7 +177,6 @@ def convert_underscore_to_dash(kwargs: Dict):
 
 def generate_dropdown(dd_id: str, attrs: Union[List, Dict], multi=False,
                       **style):
-
     formatted_style = convert_underscore_to_dash(style)
 
     if isinstance(attrs, List):
@@ -216,7 +223,6 @@ def generate_widget(algo_name):
 
 def generate_flex_style(direction='row', wrap=True, justify='left',
                         alignment='stretch', grow='0', **kwargs):
-
     formatted_style = convert_underscore_to_dash(kwargs)
 
     params = {

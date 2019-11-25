@@ -2,7 +2,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 from app import app
-from layouts import dataset_layout, build_layout
+from layouts import dataset_layout, build_layout, results_layout
 import callbacks
 
 '''From Dash documentation: The Dash instance is defined in a separate
@@ -17,9 +17,10 @@ app.layout = html.Div([
         dcc.Tab(label='Dataset', value='dataset', children=dataset_layout,
                 style={'fontSize': '14pt', 'fontWeight': 'bold'}),
         dcc.Tab(label='Build', value='build', children=build_layout,
+                style={'fontSize': '14pt', 'fontWeight': 'bold'}),
+        dcc.Tab(label='Results', value='results', children=results_layout,
                 style={'fontSize': '14pt', 'fontWeight': 'bold'})]),
     html.Div(id='tabs-content')])
-
 
 if __name__ == '__main__':
     app.run_server(debug=True, dev_tools_hot_reload_interval=0.1)

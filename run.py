@@ -1,13 +1,12 @@
 import base64
 import io
-import json
 import os
 from datetime import datetime
 from typing import Dict, List, Union
 
 import pandas as pd
 from bson.objectid import ObjectId
-from flask import (Flask, flash, redirect, render_template, request, session,
+from flask import (Flask, redirect, render_template, request, session,
                    url_for)
 from pandas.io.json import json_normalize
 from pymongo import MongoClient
@@ -19,7 +18,7 @@ import dash_html_components as html
 import dash_table
 from dash.dependencies import Input, Output, State
 from dataset.dataset import Dataset, Element, Feature
-from model import Model
+from model.model import Model
 
 """Connections instantiated to Flask, MongoDB, and Plotly"""
 
@@ -1060,6 +1059,7 @@ def train_k_nearest_neighbors(
                   model_id=model_id, dataset_id=dataset_id,
                   X=X, y=y)
     return model.picklize()
+
 
 @app.callback(
     Output('decision tree classification', 'children'),

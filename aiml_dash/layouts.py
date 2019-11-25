@@ -151,7 +151,7 @@ preprocessing = html.Div(
         max_width='30%'),
     children=[
         html.H4('Preprocessing', style={'fontWeight': 'bold'}),
-        center,
+        #center,
         scale,
         add_scale,
         dcc.Input(style={'display': 'none'})
@@ -268,12 +268,32 @@ params_preprocess_selection = html.Div(
 
 build_layout = html.Div([
     html.Div(id='stored_data-upload', hidden=True),
-    html.Div(id='logistic regression-output', hidden=True),
-    html.Div(id='support vector classification-output', hidden=True),
-    html.Div(id='linear discriminant analysis-output', hidden=True),
-    html.Div(id='k nearest neighbors-output', hidden=True),
-    html.Div(id='decision tree classification-output', hidden=True),
+    html.Div(id='train_model-output', hidden=True),
     selection_and_name,
     params_preprocess_selection,
 
 ])
+
+results_layout = html.Div(
+    id='results-container',
+    style={
+        'display': 'grid',
+        'grid-gap': '2%',  # 50px
+        'padding': '2%',
+        'grid-template-columns': 'auto auto auto'
+    },
+    children=[
+        html.Div(
+            id='model_details-container',
+            style={
+                'grid-row-start': '1',
+                'grid-row-end': '3',
+                'align-items': 'stretch'
+            },
+            children=[
+                html.H4('Model Results', style={'fontWeight': 'bold'}),
+                html.H5('Metrics', style={'fontWeight': 'bold'}),
+                html.Div(id='metrics-container')
+                ]),
+            ]
+        )

@@ -139,7 +139,8 @@ class Feature:
             elements: List[Element] = None,
             label: str = "",
             feature_id: str = None,
-            deleted: bool = False
+            deleted: bool = False,
+            is_target: bool = False
     ):
         if not elements:
             elements = []
@@ -147,6 +148,7 @@ class Feature:
         self.label = label
         self.feature_id = str(uuid.uuid4()) if not feature_id else feature_id
         self.deleted = deleted
+        self.is_target = is_target
 
     @property
     def type(self) -> str:
@@ -203,7 +205,6 @@ class Feature:
     def series_describe(self):
         series = pd.DataFrame(self.values)
         return series.describe()
-
 
     # TODO Possibly use UUIDs instead for Dataset identifier.
     def __repr__(self):

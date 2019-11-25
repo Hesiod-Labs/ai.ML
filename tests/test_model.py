@@ -1,4 +1,4 @@
-from model import *
+from model.model import *
 
 
 svc_params = {'C': 1.0, 'kernel': 'rbf', 'degree': 3, 'gamma': 'auto', 'coef0': 0.0,
