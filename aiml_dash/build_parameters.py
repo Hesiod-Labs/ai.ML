@@ -62,7 +62,6 @@ PARAMETERS = {
             'options': {'min': 0,
                         'max': 1,
                         'step': 0.0001,
-                        'marks': {0: 'L1', 1: 'L2'}
                         },
             'default': 0
         },
@@ -77,9 +76,8 @@ PARAMETERS = {
             'widget': 'input',
             'options': {
                 'min': 0,
-                'max': 100000,
+                'max': 1000000,
                 'step': 0.0001,
-                'marks': {0: '0', 100: '100'}
             },
             'default': 0.0001
         },
@@ -90,7 +88,6 @@ PARAMETERS = {
                 'min': 0,
                 'max': 1000000,
                 'step': 0.0001,
-                'marks': {0: '0', 1000000: '1000000'}
             },
             'default': 1
         },
@@ -106,22 +103,20 @@ PARAMETERS = {
             'options': {'min': 0,
                         'max': 1000000,
                         'step': 0.0001,
-                        'marks': {0: '0', 1000000: '1000000'}
                         },
             'default': 1
         },
         'max_iter': {
-            'label': 'max iterations',
+            'label': 'max iterations (0 = no limit)',
             'widget': 'input',
-            'options': {'min': 1,
+            'options': {'min': 0,
                         'max': 1000000,
                         'step': 1,
-                        'marks': {0: '1', 1000000: '1000000'}
                         },
-            'default': 500
+            'default': 1000000
         }
     },
-    'support vector classification': {
+    'support vector classification (coming soon)': {
         'kernel': {
             'label': 'kernel',
             'widget': 'dropdown',
@@ -140,7 +135,6 @@ PARAMETERS = {
                 'min': 0,
                 'max': 1000000,
                 'step': 0.0001,
-                'marks': {0: '0', 1000000: '1000000'}
             },
             'default': 1
         },
@@ -149,9 +143,8 @@ PARAMETERS = {
             'widget': 'input',
             'options': {
                 'min': 0,
-                'max': 100,
+                'max': 1000000,
                 'step': 1,
-                'marks': {0: '0', 100: '100'}
             },
             'default': 3
         },
@@ -162,9 +155,8 @@ PARAMETERS = {
                 'min': 0,
                 'max': 1000000,
                 'step': 0.0001,
-                'marks': {0: '0', 1000000: '1000000'}
             },
-            'default': 50  # 'scale'
+            'default': 50
         },
         'coef0': {
             'label': 'constant coefficient',
@@ -173,7 +165,6 @@ PARAMETERS = {
                 'min': 0,
                 'max': 1000000,
                 'step': 0.0001,
-                'marks': {0: '0', 1000000: '1000000'}
             },
             'default': 0
         },
@@ -190,22 +181,21 @@ PARAMETERS = {
                 'min': 0,
                 'max': 1000000,
                 'step': 0.001,
-                'marks': {0: '0', 1000000: '1000000'}
             },
             'default': 0.001
         },
         'max_iter': {
-            'label': 'max iterations',
+            'label': 'max iterations (0 = no limit)',
             'widget': 'input',
             'options': {
-                'min': 1,
+                'min': 0,
                 'max': 1000000,
                 'step': 1,
-                'marks': {0: '1', 1000000: '1000000'}},
-            'default': 100,
+            },
+            'default': 1000000,
         }
     },
-    'k nearest neighbors': {
+    'k nearest neighbors (coming soon)': {
         'algorithm': {
             'label': 'algorithm',
             'widget': 'dropdown',
@@ -242,7 +232,7 @@ PARAMETERS = {
             'widget': 'input',
             'options': {
                 'min': 0,
-                'max': None,
+                'max': 1000000,
                 'step': 0.0001,
             },
             'default': 0
@@ -254,7 +244,6 @@ PARAMETERS = {
                 'min': 1,
                 'max': 1000000,
                 'step': 1,
-                'marks': {1: '1', 1000000: '1000000'}
             },
             'default': 5,
         },
@@ -265,12 +254,11 @@ PARAMETERS = {
                 'min': 1,
                 'max': 1000000,
                 'step': 1,
-                'marks': {1: '1', 1000000: '1000000'}
             },
             'default': 30
         },
     },
-    'decision tree classification': {
+    'decision tree classification (coming soon)': {
         'criterion': {
             'label': 'split criterion',
             'widget': 'dropdown',
@@ -306,18 +294,16 @@ PARAMETERS = {
                 'min': 0,
                 'max': 1000000,
                 'step': 1,
-                'marks': {0: '0', 1000000: '1000000'}
             },
-            'default': 50
+            'default': 0
         },
         'min_samples_split': {
             'label': 'min samples to split',
             'widget': 'input',
             'options': {
                 'min': 1,
-                'max': 100,
+                'max': 1000000,
                 'step': 1,
-                'marks': {1: '1', 1000000: '1000000'}
             },
             'default': 2
         },
@@ -328,7 +314,6 @@ PARAMETERS = {
                 'min': 1,
                 'max': 1000000,
                 'step': 1,
-                'marks': {1: '1', 1000000: '1000000'}
             },
             'default': 5
         },
@@ -339,18 +324,16 @@ PARAMETERS = {
                 'min': 0,
                 'max': 1,
                 'step': 0.0001,
-                'marks': {0: '0', 1: '1'}
             },
-            'default': 0.5
+            'default': 0
         },
         'max_leaf_nodes': {
             'label': 'max leaf nodes (0 = no limit)',
             'widget': 'input',
             'options': {
-                'min': -1,
+                'min': 0,
                 'max': 1000000,
                 'step': 1,
-                'marks': {0: '0', 1000000: '1000000'}
             },
             'default': 5
         },
@@ -361,12 +344,11 @@ PARAMETERS = {
                 'min': 0,
                 'max': 1000000,
                 'step': 0.0001,
-                'marks': {0: '0', 1000000: '1000000'}
             },
             'default': 0
         }
     },
-    'linear discriminant analysis': {
+    'linear discriminant analysis (coming soon)': {
         'solver': {
             'label': 'solver',
             'widget': 'dropdown',
@@ -393,7 +375,6 @@ PARAMETERS = {
                 'min': 1,
                 'max': 1000000,
                 'step': 1,
-                'marks': {1: '1', 1000000: '1000000'}
             },
             'default': 5
         },
@@ -404,7 +385,6 @@ PARAMETERS = {
                 'min': 0,
                 'max': 1000000,
                 'step': 0.0001,
-                'marks': {0: '1', 1000000: '1000000'}
             },
             'default': 0.0001
         },

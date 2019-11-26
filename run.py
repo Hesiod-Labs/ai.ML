@@ -1,12 +1,11 @@
 import base64
 import io
-import json
 import os
 
 import pandas as pd
 from bson.objectid import ObjectId
-from flask import (Flask, flash, redirect, render_template, request, session,
-                    url_for)
+from flask import (Flask, redirect, render_template, request, session,
+                   url_for)
 from pandas.io.json import json_normalize
 from pymongo import MongoClient
 
