@@ -14,12 +14,6 @@ import jsonpickle
 
 from aiml_dash import utils
 
-# - Raise errors if there is bad data
-# - Return numpy array? Or just add it into it yourself
-# - Accuracy scores and metrics from confusion matrix etc, score and loss
-# - Look into what grid search csv does
-# - Cross validation strategies
-
 
 class Model:
 
@@ -38,10 +32,23 @@ class Model:
         return self.estimator.get_params()
 
     def __str__(self):
+        """stringifies a clean and readable format of the model
+
+            Returns:
+              String version of model
+            """
         return f'Name: {self.model_id}, Type: {self.model_type}, ' \
             f'Dataset_ID:{self.dataset_id}, Params: {self.params}'
 
     def score(self, true, predicted, feature_labels):
+        """Updates self.scores property with dictionary of confusion matrix, classification report and accuracy score
+
+            Args:
+              true:
+              predicted:
+              feature_labels:
+
+            """
         self.scores.update({
             'confusion matrix': metrics.confusion_matrix(true, predicted),
             'classification report': metrics.classification_report(
@@ -53,6 +60,14 @@ class Model:
         })
 
     def train(self, features: np.ndarray, target: np.ndarray, **params):
+        """Trains the respective model and updates the model_type, estimator, and calculates the score
+
+            Args:
+              features:
+              target:
+              **params:
+
+            """
         enc_target = LabelEncoder().fit(target)
         self.classes = enc_target.classes_
         feat_tr, feat_te, tar_train, tar_test = train_test_split(
@@ -76,8 +91,24 @@ class Model:
 
 
 def unpickle(model_json: str):
+    """unpickles the object to it can be used within python code again
+
+        Args:
+          model_json:
+
+        Returns:
+          the decoded json object
+        """
     return jsonpickle.decode(model_json)
 
 
 def pickle(model: Model):
+    """pickles to model for ease of transfer to plotly and html in a usable format
+
+        Args:
+          model:
+
+        Returns:
+          encoded json object
+        """
     return jsonpickle.encode(model)
