@@ -1,37 +1,46 @@
+"""The primary Flask web application framework for ai.ML that seamlessly connect the main web pages with Dash.
+
+    Each function represents a different web page within ai.ML. 
+    They make use of flask redirects, template rendering, requests 
+    and sessions to relay user input between the frontend and backend. 
+    The Dash application is initiated on the same server as the 
+    main flask application, allowing for users to go straight to Dash from the main page. 
+"""
 import base64
 import io
 import os
 
 import pandas as pd
 from bson.objectid import ObjectId
-from flask import (Flask, redirect, render_template, request, session,
-                   url_for)
+from flask import Flask, redirect, render_template, request, session, url_for
 from pandas.io.json import json_normalize
 from pymongo import MongoClient
 
-import dash
 import aiml
+import dash
 
-# Instantiates the main Flask server, the Mongo instance, and global dataframe for shared use of a dataframe between Flask and Dash servers
 server = Flask(__name__)
 server.secret_key = os.urandom(24)
-client = MongoClient("mongodb+srv://hlabs_1:thinkBox@aiml-thzu0.mongodb.net/test?retryWrites=true&w=majority")
-df = pd.DataFrame()
+client = MongoClient("mongodb+srv://hlabs_1:thinkBox@aiml-thzu0.mongodb.net/test?retryWrites=true&w=majority") # Connection String to MongoDB Atlas
 
-# Instantiate the dash application and the base layout
 app = dash.Dash(__name__,
-                server=server,
-                external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'],
+                server=server, # Server is the same one defined above for the main flask application
+                external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'], # CSS styling is same as main html pages
                 routes_pathname_prefix='/dash/')
 app.config.suppress_callback_exceptions = True
-aiml.baselayout(app)
+aiml.baselayout(app) # Layouts for Dash application defined in 'aiml' module
 
-# User can login to their account
 @server.route('/', methods=['GET', 'POST'])
 def start():
+    """User can login to their account
+
+    Returns:
+        The 'start' template if invalid login information is provided OR
+        The 'main' template if valid login information is provided 
+    """
     if request.method == "POST":
-        db = client['aiML']
-        collection = db['users']
+        db = client['aiML'] # Connects to ai.ML database
+        collection = db['users'] # Connects to 'users' collection (this occurs every time program needs to access user information)
         if collection.count_documents({"username":f"{request.form['username']}","password":f"{request.form['password']}"}) == 1:
             user_info = collection.find_one({"username":f"{request.form['username']}"})
             session['id'] = str(user_info['_id'])
@@ -44,14 +53,23 @@ def start():
             return render_template('start.html', template_error="Could not login: incorrect username or password")
     return render_template('start.html', template_error="")
 
-# User can create an account
 @server.route('/createaccount', methods=['GET', 'POST'])
 def createaccount():
+    """User can create an account
+
+    Returns:
+        The 'createaccount' template if invalid new user information is provided OR
+        The 'main' template if valid user information is provided 
+    """
     db = client['aiML']
     collection = db['users']
     if "email" in request.form and request.method == "POST":
         if request.form['password'] == request.form['retype-password']:
             account_info = {"email":request.form['email'], "username":request.form['username'], "password":request.form['password']}
+            # Checks username, email, and password
+            # Will successfully create the account if all provided information
+            # is not already taken by another user
+            # in which case a template error will be thrown 
             for item in account_info:
                 session[item] = account_info[item]
                 if collection.count_documents({f"{item}":f"{session[item]}"}) > 0:
@@ -69,67 +87,27 @@ def createaccount():
             return render_template('createaccount.html', template_error = "Could not create account: password fields do not match")
     return render_template('createaccount.html', template_error = "")
 
-# Main page containing ai.ML functionality
 @server.route('/main', methods=['GET', 'POST'])
 def main():
+    """Main page containing ai.ML functionality
+
+    Returns:
+        The 'start' template if the user's ID is not in a session OR
+        The 'main' template 
+    """
     if not 'id' in session:
         return redirect(url_for('start'))
     return render_template('main.html')
 
-@server.route('/exploredatasets', methods=['GET', 'POST'])
-def exploredatasets():
-    db = client['aiML']
-    data_description = "description_1"
-    selected_dataset = ""
-    global df
-    if not 'id' in session:
-        return redirect(url_for('start'))
-    if request.method == "POST":
-        if "preview-btn" in request.form:
-            if request.form.get('selected_dataset', '') == "border_crossing":
-                data_description = """The Bureau of Transportation Statistics (BTS) Border Crossing Data provide summary statistics
-                                        for inbound crossings at the U.S.-Canada and the U.S.-Mexico border at the port level.
-                                        Data are available for trucks, trains, containers, buses, personal vehicles, passengers,
-                                        and pedestrians. Border crossing data are collected at ports of entry by U.S. Customs and
-                                        Border Protection (CBP). The data reflect the number of vehicles, containers, passengers or
-                                        pedestrians entering the United States. CBP does not collect comparable data on outbound crossings.
-                                        Users seeking data on outbound counts may therefore want to review data from individual bridge operators,
-                                        border state governments, or the Mexican and Canadian governments. (https://www.kaggle.com/akhilv11/border-crossing-entry-data)
-                                        Note: Only the first 10 rows and first 10 columns are previewed below
-                                    """
-            elif request.form.get('selected_dataset', '') == "crime_population":
-                data_description = """This data set was extracted from FBI-UCR website for the year 2012 on US cities with population less
-                                        than 250,000 people. The following statistics are provided: Population, Violent Crime Total, Murder/Manslaughter,
-                                        Forcible Rape, Robbery, Aggravated Assault, Property Crime Total, Burglary, Larceny Theft, Motor Vehicle Theft,
-                                        latitude and longitude. (https://www.kaggle.com/mascotinme/population-against-crime)
-                                        Note: Only the first 10 rows and first 10 columns are previewed below
-                                    """
-            elif request.form.get('selected_dataset', '') == "movies":
-                data_description = """This data on nearly 7000 films from over the last three decades contains general information on each film (i.e.
-                                        director, production company, rating, etc) as well as financial figures for the budget and revenue. All of this data
-                                        was scraped from IMBb. (https://www.kaggle.com/danielgrijalvas/movies)
-                                        Note: Only the first 10 rows and first 10 columns are previewed below
-                                    """
-        selected_dataset = request.form.get('selected_dataset', '')
-        collection = db[f'{selected_dataset}']
-        selected_data = json_normalize(collection.find({}))
-        df = selected_data[selected_data.columns[1:10]].head(10)
-        client.close()
-        if "use-dataset-btn" in request.form:
-            return redirect(url_for('build'))
-    return render_template('exploredatasets.html', selected_dataset=selected_dataset, description=data_description, tables=[df.to_html(classes='data', header="true", index="false")])
-
-# User can build their model from their chosen dataset
-@server.route('/build', methods=['GET', 'POST'])
-def build():
-    if not 'id' in session:
-        return redirect(url_for('start'))
-    global df
-    return render_template('build.html')
-
-# User can logout from their account
 @server.route('/logout', methods=['GET', 'POST'])
 def logout():
+    """User can logout from their account
+
+    Returns:
+        The 'main' template if the user decides that they do not want to log out OR
+        The 'logout' template which will redirect the user to the login page once they log out OR
+        The 'start' template if the user's ID is not in a session
+    """
     if not 'id' in session:
         return redirect(url_for('start'))
     if "returnhome" in request.form:
@@ -143,16 +121,26 @@ def logout():
             return redirect(url_for('main'))
     return render_template('logout.html')
 
-# User can view basic profile information, update email, username or password, or delete account
 @server.route('/profile', methods=['GET', 'POST'])
 def profile():
+    """User can view basic profile information, update email, username or password, or delete account
+
+    Returns:
+        The 'profile' template that showcases user information and has links for updating user information and deleting an account OR
+        The 'start' template if the user's ID is not in a session
+    """
     if not 'id' in session:
         return redirect(url_for('start'))
     return render_template('profile.html', profile = session)
 
-# User can update their email
 @server.route('/updateemail', methods=['GET', 'POST'])
 def update_email():
+    """User can update their email
+
+    Returns:
+        The 'updateemail' template if the new email is already taken (i.e. in the database) OR
+        The 'profile' template once the user is finished updating their email
+    """
     db = client['aiML']
     collection = db['users']
     if not 'id' in session:
@@ -170,9 +158,14 @@ def update_email():
         return redirect(url_for('profile'))
     return render_template('updateemail.html', template_error = "", profile = session)
 
-# User can update their username
 @server.route('/updateusername', methods=['GET', 'POST'])
 def update_username():
+    """User can update their username
+
+    Returns:
+        The 'updateusername' template if the new username is already taken (i.e. in the database) OR
+        The 'profile' template once the user is finished updating their email
+    """
     db = client['aiML']
     collection = db['users']
     if not 'id' in session:
@@ -190,9 +183,15 @@ def update_username():
         return redirect(url_for('profile'))
     return render_template('updateusername.html', template_error = "", profile = session)
 
-# User can update their password
 @server.route('/updatepassword', methods=['GET', 'POST'])
 def update_password():
+    """User can update their password
+
+    Returns:
+        The 'updatepassword' template if the user incorrectly typed their old password OR
+        The 'updatepassword' template if the new password fields do not match eachother OR
+        The 'profile' template once the user is finished updating their email
+    """
     db = client['aiML']
     collection = db['users']
     if not 'id' in session:
@@ -211,9 +210,14 @@ def update_password():
             return render_template('updatepassword.html', template_error = "Could not change password: New password fields do not match")
     return render_template('updatepassword.html', template_error = "")
 
-# User can delete an account
 @server.route('/deleteaccount', methods=['GET', 'POST'])
 def delete_account():
+    """User can delete their account
+
+    Returns:
+        The 'start' template if the user confirms to delete their account OR
+        The 'main' template if the user decides to not delete their account
+    """
     db = client['aiML']
     collection = db['users']
     if not 'id' in session:
