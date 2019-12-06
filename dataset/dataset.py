@@ -72,11 +72,7 @@ def cos(series):
 
 
 class Element:
-    def __init__(
-            self,
-            value: Union[str, int, float],
-            deleted=False
-    ):
+    def __init__(self, value: Union[str, int, float], deleted=False):
         self.value = value
         self.deleted = deleted
 
@@ -113,6 +109,9 @@ class Element:
     def __eq__(self, e):
         return self.value == e.value
 
+    def __hash__(self):
+        return hash((self.value, self.deleted))
+
     def __gt__(self, e):
         return self.value > e.value
 
@@ -132,6 +131,7 @@ class Feature:
     def __init__(
             self,
             elements: List[Element] = None,
+<<<<<<< Updated upstream
             label: str = "",
             deleted=False
     ):
@@ -139,6 +139,14 @@ class Feature:
             elements = []
         self.elements = elements
         self.label = label
+=======
+            feature_id: str = "",
+            deleted: bool = False,
+            is_target: bool = False
+    ):
+        self.elements = [] if not elements else elements
+        self.feature_id = feature_id
+>>>>>>> Stashed changes
         self.deleted = deleted
 
     @property
@@ -150,7 +158,7 @@ class Feature:
         return [e.value for e in self.elements]
 
     def rename(self, new_name: str):
-        self.label = new_name
+        self.feature_id = new_name
 
     def add(self, e: Element):
         if e.type == self.type:
@@ -185,9 +193,9 @@ class Feature:
     def is_numeric(self) -> bool:
         return all([o.is_numeric() for o in self.elements])
 
-    def unique_elements(self):
-        series = pd.DataFrame(self.values)
-        return list(series.unique())
+    def unique(self):
+        return list(set(self.values))
+
 
     def value_counts(self):
         series = pd.DataFrame(self.values)
@@ -201,13 +209,17 @@ class Feature:
     # TODO Possibly use UUIDs instead for Dataset identifier.
     def __repr__(self):
         name = self.__class__.__name__
+<<<<<<< Updated upstream
         l = self.label
         i = id(self)
+=======
+        i = self.feature_id
+>>>>>>> Stashed changes
         n = len(self.elements)
         t = "numerical" if self.is_numeric() else "categorical"
         d = self.deleted
         return f'{name}(' \
-            f'label="{l}", id={i}, n_elements={n}, type={t}, deleted={d})'
+            f'feature_id={i}, n_elements={n}, type={t}, deleted={d})'
 
     def __eq__(self, f):
         if self.__class__ == f.__class__:
@@ -216,6 +228,13 @@ class Feature:
                 return all(comps)
         else:
             return False
+
+    def __hash__(self):
+        return hash(
+            tuple(e.value for e in self.elements) +
+            tuple(e.deleted for e in self.elements) +
+            (self.feature_id,) + (self.deleted,) + (self.is_target,)
+        )
 
 
 class Dataset:
