@@ -1,19 +1,21 @@
 import base64
 import io
-
+import os
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import plotly.graph_objs as go
 import plotly.express as px
+from pymongo import MongoClient
 
 import pandas as pd
 
 from model import model
-from app import app
-from build_parameters import PARAMETERS
-import utils
+from run import app
+from .build_parameters import PARAMETERS
+from . import utils
 
+client = MongoClient("mongodb+srv://hlabs_1:thinkBox@aiml-thzu0.mongodb.net/test?retryWrites=true&w=majority") # Connection String to MongoDB Atlas
 ALGO_CALLBACK_INPUTS = [(
     f'{algo}-{param}-{meta["widget"]}',
     Input(f'{algo}-{param}-{meta["widget"]}', 'value'))
@@ -28,12 +30,21 @@ ALGO_CALLBACK_INPUTS = [(
     [State('data-upload', 'filename')]
 )
 def json_data(file, filename):
+    db = client['aiML'] # Connects to ai.ML database
     try:
         if file and filename:
             content_type, content_string = file.split(',')
             decoded = base64.b64decode(content_string)
             if 'csv' in filename:
                 df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+                for key in df:
+                    new_key = key.replace(".", "")
+                    df[new_key] = df.pop(key)
+                stored_data = df.to_dict(orient='records')
+                collection_name = os.path.splitext(filename)[0] # Names database collection after filename
+                collection = db[f'{collection_name}']
+                collection.insert_many(stored_data)
+                client.close()
                 return [utils.json_df(utils.format_dataset_name(filename), df)]
     except Exception as e:
         print(e)

@@ -1,15 +1,17 @@
 import json
 from typing import Union, List, Dict
 from datetime import datetime
-
-import dash_core_components as dcc
-import dash_html_components as html
-import dash_table
-import dash_daq as daq
+from typing import Dict, List, Union
 
 import pandas as pd
+from pymongo import MongoClient
 
-from build_parameters import PARAMETERS
+import dash_core_components as dcc
+import dash_daq as daq
+import dash_html_components as html
+import dash_table
+
+from .build_parameters import PARAMETERS
 
 NOW = datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")
 
@@ -30,7 +32,6 @@ def format_dataset_name(filename: str):
         if s in name:
             name = name.replace(s, ' ')
     return name.title()
-
 
 def generate_options(options: Union[List, Dict]):
     if isinstance(options, List):
