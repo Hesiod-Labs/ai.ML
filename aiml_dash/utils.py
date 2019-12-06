@@ -33,6 +33,7 @@ def format_dataset_name(filename: str):
             name = name.replace(s, ' ')
     return name.title()
 
+
 def generate_options(options: Union[List, Dict]):
     if isinstance(options, List):
         return [
@@ -105,17 +106,17 @@ def generate_dtable(
         sort_action='custom',
         sort_mode='multi',
         sort_by=[],
-        #style_table={'overflowX': 'scroll'},
+        # style_table={'overflowX': 'scroll'},
         style_data_conditional=[
             {
                 'if': {'row_index': 'odd'},
                 'backgroundColor': 'rgb(248, 248, 248)'
             }
         ],
-        #style_data={
+        # style_data={
         #    'whiteSpace': 'normal',
         #    'height': 'auto'
-        #},
+        # },
         style_header={
             'textAlign': 'center',
             'padding': '2px',
