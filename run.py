@@ -6,33 +6,33 @@
     The Dash application is initiated on the same server as the 
     main flask application, allowing for users to go straight to Dash from the main page. 
 """
-import base64
-import io
 import os
 
-import pandas as pd
 from bson.objectid import ObjectId
 from flask import Flask, redirect, render_template, request, session, url_for
-from pandas.io.json import json_normalize
 from pymongo import MongoClient
 
-import aiml
 import dash
 import aiml
 
 # Instantiates the main Flask server, the Mongo instance, and global dataframe for shared use of a dataframe between Flask and Dash servers
 server = Flask(__name__)
 server.secret_key = os.urandom(24)
-client = MongoClient("mongodb+srv://hlabs_1:thinkBox@aiml-thzu0.mongodb.net/test?retryWrites=true&w=majority") # Connection String to MongoDB Atlas
+client = MongoClient(
+    "mongodb+srv://hlabs_1:thinkBox@aiml-thzu0.mongodb.net/test?retryWrites=true&w=majority")  # Connection String to MongoDB Atlas
 
 # Instantiate the dash application and the base layout
 app = dash.Dash(__name__,
-                server=server, # Server is the same one defined above for the main flask application
-                external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'], # CSS styling is same as main html pages
+                server=server,
+                # Server is the same one defined above for the main flask application
+                external_stylesheets=[
+                    'https://codepen.io/chriddyp/pen/bWLwgP.css'],
+                # CSS styling is same as main html pages
                 routes_pathname_prefix='/dash/')
 app.config.suppress_callback_exceptions = True
 
-aiml.baselayout(app) # Layouts for Dash application defined in 'aiml' module
+aiml.baselayout(app)  # Layouts for Dash application defined in 'aiml' module
+
 
 # User can login to their account
 @server.route('/', methods=['GET', 'POST'])
@@ -44,10 +44,18 @@ def start():
         The 'main' template if valid login information is provided 
     """
     if request.method == "POST":
-        db = client['aiML'] # Connects to ai.ML database
-        collection = db['users'] # Connects to 'users' collection (this occurs every time program needs to access user information)
-        if collection.count_documents({"username":f"{request.form['username']}","password":f"{request.form['password']}"}) == 1:
-            user_info = collection.find_one({"username":f"{request.form['username']}"})
+        # Connects to ai.ML database
+        db = client['aiML']
+        # Connects to 'users' collection (this occurs every time program
+        # needs to access user information)
+        collection = db['users']
+        if collection.count_documents({
+            "username": f"{request.form['username']}",
+            "password": f"{request.form['password']}"}
+        ) == 1:
+            user_info = collection.find_one({
+                "username": f"{request.form['username']}"}
+            )
             session['id'] = str(user_info['_id'])
             session['email'] = user_info['email']
             session['username'] = user_info['username']
@@ -55,42 +63,56 @@ def start():
             client.close()
             return redirect(url_for('main'))
         else:
-            return render_template('start.html', template_error="Could not login: incorrect username or password")
+            return render_template(
+                'start.html',
+                template_error="Could not login: incorrect username or password"
+            )
     return render_template('start.html', template_error="")
 
-@server.route('/createaccount', methods=['GET', 'POST'])
-def createaccount():
+
+@server.route('/create_account', methods=['GET', 'POST'])
+def create_account():
     """User can create an account
 
     Returns:
-        The 'createaccount' template if invalid new user information is provided OR
+        The 'create_account' template if invalid new user information is provided OR
         The 'main' template if valid user information is provided 
     """
     db = client['aiML']
     collection = db['users']
     if "email" in request.form and request.method == "POST":
         if request.form['password'] == request.form['retype-password']:
-            account_info = {"email":request.form['email'], "username":request.form['username'], "password":request.form['password']}
+            account_info = {"email": request.form['email'],
+                            "username": request.form['username'],
+                            "password": request.form['password']}
             # Checks username, email, and password
             # Will successfully create the account if all provided information
             # is not already taken by another user
             # in which case a template error will be thrown 
             for item in account_info:
                 session[item] = account_info[item]
-                if collection.count_documents({f"{item}":f"{session[item]}"}) > 0:
+                if collection.count_documents(
+                        {f"{item}": f"{session[item]}"}) > 0:
                     session.pop(item)
                     client.close()
-                    return render_template('createaccount.html', template_error = f"Could not create account: {item} is part of another account")
-            user_info = {"email":f"{request.form['email']}",
-                        "username":f"{request.form['username']}",
-                        "password":f"{request.form['password']}"}
+                    return render_template(
+                        'createaccount.html',
+                        template_error=f"Could not create account: {item} is "
+                        f"part of another account")
+            user_info = {"email": f"{request.form['email']}",
+                         "username": f"{request.form['username']}",
+                         "password": f"{request.form['password']}"}
             user_id = collection.insert_one(user_info).inserted_id
             session['id'] = str(user_id)
             client.close()
             return redirect(url_for('main'))
         else:
-            return render_template('createaccount.html', template_error = "Could not create account: password fields do not match")
-    return render_template('createaccount.html', template_error = "")
+            return render_template(
+                'createaccount.html',
+                template_error="Could not create account: password fields do "
+                               "not match")
+    return render_template('createaccount.html', template_error="")
+
 
 @server.route('/main', methods=['GET', 'POST'])
 def main():
@@ -110,7 +132,7 @@ def exploredatasets():
     if request.method == "POST":
         if "preview-btn" in request.form:
             if request.form.get('selected_dataset', '') == "border_crossing":
-                data_description = """The Bureau of Transportation Statistics (BTS) Border Crossing Data provide summary statistics
+                data_description = '''The Bureau of Transportation Statistics (BTS) Border Crossing Data provide summary statistics
                                         for inbound crossings at the U.S.-Canada and the U.S.-Mexico border at the port level.
                                         Data are available for trucks, trains, containers, buses, personal vehicles, passengers,
                                         and pedestrians. Border crossing data are collected at ports of entry by U.S. Customs and
@@ -119,20 +141,20 @@ def exploredatasets():
                                         Users seeking data on outbound counts may therefore want to review data from individual bridge operators,
                                         border state governments, or the Mexican and Canadian governments. (https://www.kaggle.com/akhilv11/border-crossing-entry-data)
                                         Note: Only the first 10 rows and first 10 columns are previewed below
-                                    """
+                                    '''
             elif request.form.get('selected_dataset', '') == "crime_population":
-                data_description = """This data set was extracted from FBI-UCR website for the year 2012 on US cities with population less
+                data_description = '''This data set was extracted from FBI-UCR website for the year 2012 on US cities with population less
                                         than 250,000 people. The following statistics are provided: Population, Violent Crime Total, Murder/Manslaughter,
                                         Forcible Rape, Robbery, Aggravated Assault, Property Crime Total, Burglary, Larceny Theft, Motor Vehicle Theft,
                                         latitude and longitude. (https://www.kaggle.com/mascotinme/population-against-crime)
                                         Note: Only the first 10 rows and first 10 columns are previewed below
-                                    """
+                                    '''
             elif request.form.get('selected_dataset', '') == "movies":
-                data_description = """This data on nearly 7000 films from over the last three decades contains general information on each film (i.e.
+                data_description = '''This data on nearly 7000 films from over the last three decades contains general information on each film (i.e.
                                         director, production company, rating, etc) as well as financial figures for the budget and revenue. All of this data
                                         was scraped from IMBb. (https://www.kaggle.com/danielgrijalvas/movies)
                                         Note: Only the first 10 rows and first 10 columns are previewed below
-                                    """
+                                    '''
         selected_dataset = request.form.get('selected_dataset', '')
         collection = db[f'{selected_dataset}']
         selected_data = json_normalize(collection.find({}))
@@ -146,9 +168,10 @@ def exploredatasets():
         The 'start' template if the user's ID is not in a session OR
         The 'main' template 
     """
-    if not 'id' in session:
+    if 'id' not in session:
         return redirect(url_for('start'))
     return render_template('main.html')
+
 
 @server.route('/logout', methods=['GET', 'POST'])
 def logout():
@@ -159,7 +182,7 @@ def logout():
         The 'logout' template which will redirect the user to the login page once they log out OR
         The 'start' template if the user's ID is not in a session
     """
-    if not 'id' in session:
+    if 'id' not in session:
         return redirect(url_for('start'))
     if "returnhome" in request.form:
         if request.form["returnhome"] == "Yes":
@@ -172,6 +195,7 @@ def logout():
             return redirect(url_for('main'))
     return render_template('logout.html')
 
+
 @server.route('/profile', methods=['GET', 'POST'])
 def profile():
     """User can view basic profile information, update email, username or password, or delete account
@@ -180,9 +204,10 @@ def profile():
         The 'profile' template that showcases user information and has links for updating user information and deleting an account OR
         The 'start' template if the user's ID is not in a session
     """
-    if not 'id' in session:
+    if 'id' not in session:
         return redirect(url_for('start'))
-    return render_template('profile.html', profile = session)
+    return render_template('profile.html', profile=session)
+
 
 @server.route('/updateemail', methods=['GET', 'POST'])
 def update_email():
@@ -194,20 +219,29 @@ def update_email():
     """
     db = client['aiML']
     collection = db['users']
-    if not 'id' in session:
+    if 'id' not in session:
         return redirect(url_for('start'))
     if request.method == "GET":
-        user_info = collection.find_one({"email":f"{session['email']}"})
+        user_info = collection.find_one({"email": f"{session['email']}"})
         email = user_info['email']
     if request.method == "POST":
         new_email = request.form['new-email']
-        if collection.count_documents({"email":f"{request.form['new-email']}"}) > 0:
-            return render_template('updateemail.html', template_error = "Could not update email: email is already a part of another account", profile = session)
-        collection.update_one({"_id":ObjectId(f"{session['id']}")}, {"$set":{"email":f"{new_email}"}})
+        if collection.count_documents(
+                {"email": f"{request.form['new-email']}"}) > 0:
+            return render_template(
+                'updateemail.html',
+                template_error="Could not update email: email is already a "
+                               "part of another account",
+                profile=session
+            )
+        collection.update_one({"_id": ObjectId(f"{session['id']}")},
+                              {"$set": {"email": f"{new_email}"}})
         session['email'] = new_email
         client.close()
         return redirect(url_for('profile'))
-    return render_template('updateemail.html', template_error = "", profile = session)
+    return render_template('updateemail.html', template_error="",
+                           profile=session)
+
 
 @server.route('/updateusername', methods=['GET', 'POST'])
 def update_username():
@@ -219,20 +253,29 @@ def update_username():
     """
     db = client['aiML']
     collection = db['users']
-    if not 'id' in session:
+    if 'id' not in session:
         return redirect(url_for('start'))
     if request.method == "GET":
-        user_info = collection.find_one({"username":f"{session['username']}"})
+        user_info = collection.find_one({"username": f"{session['username']}"})
         username = user_info['username']
     if request.method == "POST":
         new_username = request.form['new-username']
-        if collection.count_documents({"username":f"{request.form['new-username']}"}) > 0:
-            return render_template('updateusername.html', template_error = "Could not update username: username is already a part of another account", profile = session)
-        collection.update_one({"_id":ObjectId(f"{session['id']}")}, {"$set":{"username":f"{new_username}"}})
+        if collection.count_documents(
+                {"username": f"{request.form['new-username']}"}) > 0:
+            return render_template(
+                'updateusername.html',
+                template_error="Could not update username: username is "
+                               "already a part of another account",
+                profile=session
+            )
+        collection.update_one({"_id": ObjectId(f"{session['id']}")},
+                              {"$set": {"username": f"{new_username}"}})
         session['username'] = new_username
         client.close()
         return redirect(url_for('profile'))
-    return render_template('updateusername.html', template_error = "", profile = session)
+    return render_template('updateusername.html', template_error="",
+                           profile=session)
+
 
 @server.route('/updatepassword', methods=['GET', 'POST'])
 def update_password():
@@ -245,21 +288,30 @@ def update_password():
     """
     db = client['aiML']
     collection = db['users']
-    if not 'id' in session:
+    if 'id' not in session:
         return redirect(url_for('start'))
     if request.method == "POST":
         if request.form['new-password'] == request.form['retype-new-password']:
-            if collection.count_documents({"password":f"{request.form['old-password']}"}) == 1:
+            if collection.count_documents(
+                    {"password": f"{request.form['old-password']}"}) == 1:
                 new_password = request.form['new-password']
-                collection.update_one({"_id":ObjectId(f"{session['id']}")}, {"$set":{"password":f"{new_password}"}})
+                collection.update_one({"_id": ObjectId(f"{session['id']}")},
+                                      {"$set": {"password": f"{new_password}"}})
                 session['password'] = new_password
                 client.close()
                 return redirect(url_for('profile'))
             else:
-                return render_template('updatepassword.html', template_error = "Could not change password: Incorrect old password")
+                return render_template(
+                    'updatepassword.html',
+                    template_error="Could not change password: Incorrect old "
+                                   "password")
         else:
-            return render_template('updatepassword.html', template_error = "Could not change password: New password fields do not match")
-    return render_template('updatepassword.html', template_error = "")
+            return render_template(
+                'updatepassword.html',
+                template_error="Could not change password: New password "
+                               "fields do not match")
+    return render_template('updatepassword.html', template_error="")
+
 
 @server.route('/deleteaccount', methods=['GET', 'POST'])
 def delete_account():
@@ -271,16 +323,17 @@ def delete_account():
     """
     db = client['aiML']
     collection = db['users']
-    if not 'id' in session:
+    if 'id' not in session:
         return redirect(url_for('start'))
     if request.method == "POST":
         if "delete-btn" in request.form:
-            collection.delete_one({"_id":ObjectId(f"{session['id']}")})
+            collection.delete_one({"_id": ObjectId(f"{session['id']}")})
             client.close()
             return redirect(url_for('start'))
         if "returnhome" in request.form:
             return redirect(url_for('main'))
     return render_template('deleteaccount.html')
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
