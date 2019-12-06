@@ -1,5 +1,5 @@
 *.idea
 __pycache__/
-aiml_dash/__pycache/
+aiml_dash/__pycache__/
 tests/.hypothesis
 *.pyc
