@@ -20,3 +20,7 @@ dataset/__pycache__/dataset.cpython-37.pyc
 dataset/__pycache__/dataset.cpython-37.pyc
 dataset/__pycache__/dataset.cpython-37.pyc
 *.pyc
+tests/.hypothesis/tmp/tmp0r6ixgn3
+tests/.hypothesis/tmp/tmpud0o76kw
+tests/.hypothesis/tmp/tmpyq5ma9cd
+tests/.hypothesis/unicode_data/11.0.0/charmap.json.gz
