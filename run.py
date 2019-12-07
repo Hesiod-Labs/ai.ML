@@ -65,7 +65,7 @@ def start():
     return render_template('start.html', template_error="")
 
 
-@server.route('/create_account', methods=['GET', 'POST'])
+@server.route('/createaccount', methods=['GET', 'POST'])
 def create_account():
     """User can create an account
 
