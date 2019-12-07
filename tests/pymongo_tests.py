@@ -1,5 +1,4 @@
 import pytest
-from pandas import DataFrame
 from pymongo import MongoClient
 
 client = MongoClient("mongodb+srv://hlabs_1:thinkBox@aiml-thzu0.mongodb.net/test?retryWrites=true&w=majority")
@@ -167,3 +166,33 @@ class TestMongo:
             assert ((password_count_1 and password_count_2) == 0) is True
         else:
             assert ((password_count_1 and password_count_2) == 0) is False
+
+    # Test for uploading a large dataset
+    def test_upload_to_database(self):
+        data = [{"email1":"test1@case.edu",
+                "languages":["java", "python"],
+                "classes":["eecs340", "eecs393"]},
+                {"email2":"test2@case.edu",
+                "languages":["ruby", "objective-c"],
+                "classes":["eecs293" "eecs281"]},
+                {"email2":"test2@case.edu",
+                "languages":["python", "systemverilog", "c++"],
+                "classes":["eecs600", "eecs440"]},
+                {"email4":"test4@case.edu",
+                "languages":["R", "c#"],
+                "classes":["eecs290", "eecs233", "eecs302"]}]
+        collection.delete_many({})
+        massinsert_id = collection.insert_many(data).inserted_ids
+        total_count = collection.count_documents({})
+        if total_count == 4:
+            assert (total_count == 4) is True
+        else:
+            assert (total_count == 4) is False
+        email_count_1 = collection.count_documents({"email1":"test1@case.edu"})
+        email_count_2 = collection.count_documents({"email2":"test2@case.edu"})
+        if email_count_1 == 1 and email_count_2 == 2:
+            assert (email_count_1 == 1) is True
+            assert (email_count_2 == 2) is True
+        else:
+            assert (email_count_1 == 1) is False
+            assert (email_count_2 == 2) is False

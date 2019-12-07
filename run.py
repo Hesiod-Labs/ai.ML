@@ -25,7 +25,6 @@ client = MongoClient(
     "mongodb+srv://hlabs_1:thinkBox@aiml-thzu0.mongodb.net/test?retryWrites"
     "=true&w=majority")  # Connection String to MongoDB Atlas
 
-# Instantiate the dash application and the base layout
 app = dash.Dash(__name__,
                 server=server,
                 # Server is the same one defined above for the main flask
@@ -35,11 +34,8 @@ app = dash.Dash(__name__,
                 # CSS styling is same as main html pages
                 routes_pathname_prefix='/dash/')
 app.config.suppress_callback_exceptions = True
+aiml.baselayout(app) # Layouts for Dash application defined in 'aiml' module
 
-aiml.baselayout(app)  # Layouts for Dash application defined in 'aiml' module
-
-
-# User can login to their account
 @server.route('/', methods=['GET', 'POST'])
 def start():
     """User can login to their account
@@ -122,9 +118,6 @@ def create_account():
 @server.route('/main', methods=['GET', 'POST'])
 def main():
     """Main page containing ai.ML functionality
-    if not 'id' in session:
-        return redirect(url_for('start'))
-    return render_template('main.html')
 
     Returns:
         One of the following:
