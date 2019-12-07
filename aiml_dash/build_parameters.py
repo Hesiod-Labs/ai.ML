@@ -1,3 +1,9 @@
+"""Reference data dictionaries for scoring metrics and algorithm parameters.
+    Utilized in aiml_dash.callbacks.py for generating Dash core component
+    options, and functionality. Allows Dash core components to be
+    auto-generated since the structure of the dictionary is known.
+"""
+
 SCORING_METRICS = {
     'classification': {
         'default': 'accuracy',

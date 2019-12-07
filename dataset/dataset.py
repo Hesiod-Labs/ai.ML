@@ -1,75 +1,5 @@
 import uuid
 from typing import List, Union
-import numpy as np
-import pandas as pd
-import math
-
-
-# need pandas seires objects passed in, too complicated with objects
-
-def ratio(numerator, denominator):
-    return numerator / denominator
-
-
-# takes in a list of only boolean columns
-def count_boolean(series_list):
-    rows = len(series_list[0])
-    new_column = np.empty(rows, dtype=int)
-    counter = 0
-    while counter < rows:
-        total = 0
-        for series in series_list:
-            total += series[counter]
-        new_column[counter] = total
-        counter += 1
-    return new_column
-
-
-def absolute_value(series):
-    new_column = np.empty(len(series), dtype=float)
-    counter = 0
-    for entry in series:
-        new_column[counter] = abs(entry)
-        counter += 1
-    return new_column
-
-
-def squared(series):
-    new_column = np.empty(len(series), dtype=float)
-    counter = 0
-    for entry in series:
-        new_column[counter] = math.pow(entry, 2)
-        counter += 1
-    return new_column
-
-
-def z_score(series):
-    new_column = np.empty(len(series), dtype=float)
-    counter = 0
-    mean = series.mean()
-    std = series.std()
-    for entry in series:
-        new_column[counter] = (entry - mean) / std
-        counter += 1
-    return new_column
-
-
-def sin(series):
-    new_column = np.empty(len(series), dtype=float)
-    counter = 0
-    for entry in series:
-        new_column[counter] = math.sin(entry)
-        counter += 1
-    return new_column
-
-
-def cos(series):
-    new_column = np.empty(len(series), dtype=float)
-    counter = 0
-    for entry in series:
-        new_column[counter] = math.cos(entry)
-        counter += 1
-    return new_column
 
 
 class Element:
@@ -246,33 +176,6 @@ class Feature:
             """
         return all([o.is_numeric() for o in self.elements])
 
-    def unique_elements(self):
-        """determines the list of unique elements in a series
-
-            Returns:
-              list of unique elements in the series
-            """
-        series = pd.DataFrame(self.values)
-        return list(series.unique())
-
-    def value_counts(self):
-        """maps the name of the series to the number of entries in that feature
-
-            Returns:
-              the dictionary with a name of the series mapped to the number of entries
-            """
-        series = pd.DataFrame(self.values)
-        return dict(series.value_counts())
-
-    def series_describe(self):
-        """gets a quick description of a pandas series
-
-            Returns:
-              a pandas series of min, max, mean, datatype, std, and count
-            """
-        series = pd.DataFrame(self.values)
-        return series.describe()
-
     # TODO Possibly use UUIDs instead for Dataset identifier.
     def __repr__(self):
         name = self.__class__.__name__
@@ -439,42 +342,6 @@ class Dataset:
               true if the feature is numerical and false otherwise
             """
         return self.features[id(f)].is_numeric()
-
-    def head(self):
-        """gets the first 5 entries within a dataframe
-
-            Returns:
-              a dataframe in itself encompassing the first 5 entries of the current dataframe object
-            """
-        df = pd.DataFrame(self.features)
-        return df.head()
-
-    def tail(self):
-        """gets the last 5 entries within a dataframe
-
-            Returns:
-              a dataframe in itself encompassing the last 5 entries of the current dataframe object
-            """
-        df = pd.DataFrame(self.features)
-        return df.tail()
-
-    def sum_isnull(self):
-        """sums up how many null or empty fields in the dataframe
-
-            Returns:
-              an int for how many null values are included in the dataframe
-            """
-        df = pd.DataFrame(self.features)
-        return df.isnull().sum()
-
-    def df_describe(self):
-        """wrapper for pandas built in description including count, max, min, mean, std, data type
-
-            Returns:
-                the built in pandas dataframe function is in itself a pandas series
-            """
-        df = pd.DataFrame(self.features)
-        return df.describe()
 
     def __repr__(self):
         name = self.__class__.__name__

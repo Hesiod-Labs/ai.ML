@@ -17,10 +17,29 @@ NOW = datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")
 
 
 def json_df(name: str, dataframe: pd.DataFrame):
+    """Serialize a pandas Dataframe and dataset name into a JSON.
+
+    Args:
+        name: Name of the pandas Dataframe that contains the dataset data.
+        dataframe: pandas Dataframe.
+
+    Returns: JSON file containing the name and data.
+
+    """
     return json.dumps({'name': name, 'data': dataframe.to_json()})
 
 
 def unjson_df(df_json: str):
+    """Complement to json_df. Unserializes a JSON to give the dataset name
+    and data.
+
+    Args:
+        df_json: JSON file.
+
+    Returns: The name of the dataset and the pandas Dataframe containing the
+        dataset data.
+
+    """
     df_dict = json.loads(df_json)
     return df_dict['name'], pd.read_json(df_dict['data'])
 
@@ -47,6 +66,7 @@ def generate_options(options: Union[List, Dict]):
         ]
 
 
+"""
 def split_filter_query(query):
     operators = [
         ['ge ', '>='],
@@ -74,6 +94,7 @@ def split_filter_query(query):
                         print(e)
                 return name, op_type[0].strip(), value
     return [None] * 3
+"""
 
 
 def generate_dtable(
@@ -85,6 +106,19 @@ def generate_dtable(
         virtual=True,
         editable=True
 ):
+    """Generates a dash_table instance.
+    Args:
+        df: Decoded uploaded file.
+        table_id: ID of the table
+        hide_cols: boolean, whether or not columns can be hidden
+        rename_cols: boolean, whether or not columns can be renamed
+        delete_cols: boolean, whether or not columns can be deleted
+        virtual: boolean, whether or not the table is virtually displayed
+        editable: boolean, whether or not cell values can be edited
+
+    Returns: dash_table instance.
+
+    """
     df = pd.DataFrame(df)
     df[''] = df.index
     df.columns = [c.replace('_', ' ').title() for c in df.columns]
@@ -106,7 +140,6 @@ def generate_dtable(
         sort_action='custom',
         sort_mode='multi',
         sort_by=[],
-        # style_table={'overflowX': 'scroll'},
         style_data_conditional=[
             {
                 'if': {'row_index': 'odd'},
@@ -130,6 +163,8 @@ def generate_dtable(
             'textAlign': 'center'
         },
     )
+
+# Wrappers for generating Dash core components and dash_html_components.
 
 
 def generate_slider(sl_id: str, attrs: Dict):

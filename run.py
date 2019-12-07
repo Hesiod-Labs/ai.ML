@@ -1,10 +1,12 @@
-"""The primary Flask web application framework for ai.ML that seamlessly connect the main web pages with Dash.
+"""The primary Flask web application framework for ai.ML that seamlessly
+    connect the main web pages with Dash.
 
     Each function represents a different web page within ai.ML. 
     They make use of flask redirects, template rendering, requests 
     and sessions to relay user input between the frontend and backend. 
     The Dash application is initiated on the same server as the 
-    main flask application, allowing for users to go straight to Dash from the main page. 
+    main flask application, allowing for users to go straight to Dash from the
+    main page.
 """
 import os
 
@@ -15,16 +17,19 @@ from pymongo import MongoClient
 import dash
 import aiml
 
-# Instantiates the main Flask server, the Mongo instance, and global dataframe for shared use of a dataframe between Flask and Dash servers
+# Instantiates the main Flask server, the Mongo instance, and global
+# dataframe for shared use of a dataframe between Flask and Dash servers
 server = Flask(__name__)
 server.secret_key = os.urandom(24)
 client = MongoClient(
-    "mongodb+srv://hlabs_1:thinkBox@aiml-thzu0.mongodb.net/test?retryWrites=true&w=majority")  # Connection String to MongoDB Atlas
+    "mongodb+srv://hlabs_1:thinkBox@aiml-thzu0.mongodb.net/test?retryWrites"
+    "=true&w=majority")  # Connection String to MongoDB Atlas
 
 # Instantiate the dash application and the base layout
 app = dash.Dash(__name__,
                 server=server,
-                # Server is the same one defined above for the main flask application
+                # Server is the same one defined above for the main flask
+                # application
                 external_stylesheets=[
                     'https://codepen.io/chriddyp/pen/bWLwgP.css'],
                 # CSS styling is same as main html pages
@@ -75,8 +80,8 @@ def create_account():
     """User can create an account
 
     Returns:
-        The 'create_account' template if invalid new user information is provided OR
-        The 'main' template if valid user information is provided 
+        The 'create_account' template if invalid new user information is
+        provided OR The 'main' template if valid user information is provided
     """
     db = client['aiML']
     collection = db['users']
@@ -122,8 +127,9 @@ def main():
     return render_template('main.html')
 
     Returns:
-        The 'start' template if the user's ID is not in a session OR
-        The 'main' template 
+        One of the following:
+            - The 'start' template if the user's ID is not in a session
+            - The 'main' template
     """
     if 'id' not in session:
         return redirect(url_for('start'))
@@ -135,9 +141,12 @@ def logout():
     """User can logout from their account
 
     Returns:
-        The 'main' template if the user decides that they do not want to log out OR
-        The 'logout' template which will redirect the user to the login page once they log out OR
-        The 'start' template if the user's ID is not in a session
+        One of the following:
+            - The 'main' template if the user decides that they do not want to
+                log out
+            - The 'logout' template which will redirect the user to the login
+                page once they log out
+            - The 'start' template if the user's ID is not in a session
     """
     if 'id' not in session:
         return redirect(url_for('start'))
@@ -155,11 +164,14 @@ def logout():
 
 @server.route('/profile', methods=['GET', 'POST'])
 def profile():
-    """User can view basic profile information, update email, username or password, or delete account
+    """User can view basic profile information, update email, username or
+        password, or delete account
 
     Returns:
-        The 'profile' template that showcases user information and has links for updating user information and deleting an account OR
-        The 'start' template if the user's ID is not in a session
+        One of the following:
+            - The 'profile' template that showcases user information and has
+                links for updating user information and deleting an account
+            - The 'start' template if the user's ID is not in a session
     """
     if 'id' not in session:
         return redirect(url_for('start'))
@@ -171,8 +183,11 @@ def update_email():
     """User can update their email
 
     Returns:
-        The 'updateemail' template if the new email is already taken (i.e. in the database) OR
-        The 'profile' template once the user is finished updating their email
+        One of the following:
+            - The 'updateemail' template if the new email is already taken (
+                i.e. in the database)
+            - The 'profile' template once the user is finished updating their
+                email
     """
     db = client['aiML']
     collection = db['users']
@@ -205,8 +220,11 @@ def update_username():
     """User can update their username
 
     Returns:
-        The 'updateusername' template if the new username is already taken (i.e. in the database) OR
-        The 'profile' template once the user is finished updating their email
+        One of the following:
+            - The 'updateusername' template if the new username is already
+                taken (i.e. in the database)
+            - The 'profile' template once the user is finished updating their
+                email
     """
     db = client['aiML']
     collection = db['users']
@@ -239,9 +257,13 @@ def update_password():
     """User can update their password
 
     Returns:
-        The 'updatepassword' template if the user incorrectly typed their old password OR
-        The 'updatepassword' template if the new password fields do not match eachother OR
-        The 'profile' template once the user is finished updating their email
+        One of the following:
+            - The 'updatepassword' template if the user incorrectly typed
+                their old password
+            - The 'updatepassword' template if the new password fields do not
+                match eachother OR
+            - The 'profile' template once the user is finished updating their
+                email
     """
     db = client['aiML']
     collection = db['users']
@@ -275,8 +297,11 @@ def delete_account():
     """User can delete their account
 
     Returns:
-        The 'start' template if the user confirms to delete their account OR
-        The 'main' template if the user decides to not delete their account
+        One of the following:
+            - The 'start' template if the user confirms to delete their
+                account
+            - The 'main' template if the user decides to not delete their
+                account
     """
     db = client['aiML']
     collection = db['users']

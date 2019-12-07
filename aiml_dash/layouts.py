@@ -4,6 +4,10 @@ import dash_html_components as html
 from .build_parameters import PARAMETERS, SCORING_METRICS
 from . import utils
 
+"""All the dash_html_components for generating the layouts of the Dash 
+portion of ai.ML.
+"""
+
 dataset_layout = html.Div(
     style={'margin': '2%'},
     children=[
@@ -94,12 +98,6 @@ center_value = html.Div(
     ]
 )
 
-center = html.Div(
-    id='center-container',
-    style=utils.generate_flex_style(),
-    children=[center_feature, center_value]
-)
-
 scale_feature = html.Div(
     id='scale_feature-container',
     style=utils.generate_flex_style(grow='1'),
@@ -151,7 +149,6 @@ preprocessing = html.Div(
     children=[
         html.H4('Preprocessing (coming soon!)',
                 style={'fontWeight': 'bold', 'color': 'gray'}),
-        #center,
         scale,
         add_scale,
         dcc.Input(style={'display': 'none'})
