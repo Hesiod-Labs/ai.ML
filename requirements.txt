@@ -5,7 +5,7 @@ dash-core-components==1.5.1
 dash-html-components==1.0.2
 dash-renderer==1.2.1
 dash-table==4.5.1
-numpy==1.16.5
+numpy==1.22.0
 pandas
 dnspython==1.16.0
 itsdangerous==1.1.0
